@@ -16,7 +16,7 @@ git status --short
 ```
 
 `make update` refuses uncommitted changes. It runs blocking lazy.nvim updates,
-which also execute the Treesitter parser build hook, confirms the four Mason
+which also execute the Treesitter parser build hook, confirms the six Mason
 packages, runs doctor and smoke tests, and displays repository and lockfile
 changes. It never creates branches or commits and does not update system tools.
 
@@ -58,3 +58,12 @@ Compile every changed Lua file with `loadfile()` under Neovim. After install or
 update changes, also run blocking `:Lazy! sync`, reconcile Mason packages, and
 search the repository for caches, downloaded archives, plugin data, swap files,
 and build output. Record anything that could only be checked interactively.
+
+## Save-time policy
+
+Formatting, ESLint fixes, and TypeScript source actions are intentionally
+manual. If format-on-save becomes an explicit project decision later, add a
+narrow Conform `format_on_save` policy in `lua/plugins/format.lua`, document
+timeout and LSP-fallback behavior, and test it independently. Do not fold ESLint
+fix-all or import organization into that hook; those actions can change program
+semantics and remain explicit commands.

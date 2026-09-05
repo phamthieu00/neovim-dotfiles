@@ -46,18 +46,13 @@ run_nvim() {
     XDG_DATA_HOME="${DATA_HOME}" \
     XDG_STATE_HOME="${TEMP_ROOT}/state" \
     XDG_CACHE_HOME="${TEMP_ROOT}/cache" \
-    "${NVIM}" --headless "$@" +qa
+    "${NVIM}" --headless "$@" \
+    '+lua if vim.v.errmsg ~= "" then vim.cmd("cquit 1") end' +qa
 }
 
 check_runtime() {
   run_nvim \
-    "+lua for _,m in ipairs({'config.options','config.keymaps','config.autocmds','config.lazy'}) do assert(package.loaded[m], m .. ' not loaded') end" \
-    "+lua assert(require('telescope') and require('blink.cmp') and require('conform') and require('gitsigns') and require('nvim-treesitter'))" \
-    "+Lazy! load nvim-lspconfig mason.nvim mason-lspconfig.nvim" \
-    "+lua assert(vim.lsp.config.lua_ls and vim.lsp.config.ts_ls, 'LSP configs unavailable')" \
-    "+lua for _,c in ipairs({'Telescope','ConformInfo','Mason'}) do assert(vim.fn.exists(':' .. c) == 2, c .. ' command unavailable') end" \
-    "+lua local r=require('mason-registry'); for _,n in ipairs({'lua-language-server','typescript-language-server','stylua','prettierd'}) do assert(r.is_installed(n), n .. ' is not installed') end" \
-    "+lua local i=require('nvim-treesitter').get_installed(); local s={}; for _,n in ipairs(i) do s[n]=true end; for _,n in ipairs({'lua','vim','vimdoc','bash','json','yaml','javascript','typescript','tsx','markdown','markdown_inline'}) do assert(s[n], n .. ' parser is not installed') end"
+    "+lua dofile([[${REPO_ROOT}/tests/smoke.lua]]).runtime()"
 }
 
 printf 'Smoke test: first network-free startup.\n'
@@ -67,7 +62,10 @@ check_runtime
 
 run_nvim "${REPO_ROOT}/tests/fixtures/test.lua" \
   "+lua assert(vim.bo.filetype == 'lua', 'Lua filetype detection failed'); assert(vim.wait(10000, function() return #vim.lsp.get_clients({ bufnr = 0, name = 'lua_ls' }) > 0 end), 'lua_ls did not attach')"
-run_nvim "${REPO_ROOT}/tests/fixtures/test.ts" \
-  "+lua assert(vim.bo.filetype == 'typescript', 'TypeScript filetype detection failed'); assert(vim.wait(10000, function() return #vim.lsp.get_clients({ bufnr = 0, name = 'ts_ls' }) > 0 end), 'ts_ls did not attach')"
+typescript_fixture="${REPO_ROOT}/tests/fixtures/typescript"
+run_nvim "${typescript_fixture}/src/app.controller.ts" \
+  "+lua dofile([[${REPO_ROOT}/tests/smoke.lua]]).typescript([[${typescript_fixture}]])"
+run_nvim "${typescript_fixture}/tsconfig.json" \
+  "+lua dofile([[${REPO_ROOT}/tests/smoke.lua]]).json()"
 
 printf 'Smoke test passed.\n'

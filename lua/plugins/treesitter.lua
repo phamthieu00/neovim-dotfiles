@@ -20,6 +20,7 @@ local filetypes = {
   "sh",
   "bash",
   "json",
+  "jsonc",
   "yaml",
   "javascript",
   "javascriptreact",

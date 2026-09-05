@@ -39,9 +39,21 @@ check_command() {
 
 NVIM="${NVIM_BIN:-$(command -v nvim || true)}"
 
-for command_name in git curl tar gzip unzip rg make npm; do
+for command_name in git curl tar gzip unzip rg make; do
   check_command "${command_name}" "Coding MVP dependency"
 done
+
+if command -v npm >/dev/null 2>&1; then
+  ok "npm is available ($(npm --version))."
+else
+  error "npm is required for Node.js tooling."
+fi
+
+if command -v pnpm >/dev/null 2>&1; then
+  ok "optional pnpm is available ($(pnpm --version))."
+else
+  warning "pnpm is not installed; npm remains fully supported."
+fi
 
 if command -v cc >/dev/null 2>&1; then
   ok "C compiler is available ($(cc --version | head -n 1))."
@@ -99,7 +111,8 @@ fi
 run_nvim_check() {
   local description="$1"
   shift
-  if "${NVIM}" --headless "$@" +qa >/dev/null 2>&1; then
+  if "${NVIM}" --headless "$@" \
+    '+lua if vim.v.errmsg ~= "" then vim.cmd("cquit 1") end' +qa >/dev/null 2>&1; then
     ok "${description}"
   else
     error "${description} failed."
@@ -135,10 +148,10 @@ if [[ -n "${NVIM}" && -L "${CONFIG_LINK}" ]] \
     "+lua assert(require('telescope') and require('blink.cmp') and require('conform') and require('gitsigns') and require('nvim-treesitter'))"
   run_nvim_check "LSP configurations resolve." \
     "+Lazy! load nvim-lspconfig mason.nvim mason-lspconfig.nvim" \
-    "+lua assert(vim.lsp.config.lua_ls and vim.lsp.config.ts_ls)"
+    "+lua for _,n in ipairs({'lua_ls','ts_ls','eslint','jsonls'}) do assert(vim.lsp.config[n], n .. ' config unavailable') end"
   run_nvim_check "Required Mason packages are installed." \
     "+Lazy! load mason.nvim" \
-    "+lua local r=require('mason-registry'); for _,n in ipairs({'lua-language-server','typescript-language-server','stylua','prettierd'}) do assert(r.is_installed(n), n .. ' is not installed') end"
+    "+lua local r=require('mason-registry'); for _,n in ipairs({'lua-language-server','typescript-language-server','eslint-lsp','json-lsp','stylua','prettierd'}) do assert(r.is_installed(n), n .. ' is not installed') end"
   run_nvim_check "Required Treesitter parsers are installed." \
     "+lua local i=require('nvim-treesitter').get_installed(); local s={}; for _,n in ipairs(i) do s[n]=true end; for _,n in ipairs({'lua','vim','vimdoc','bash','json','yaml','javascript','typescript','tsx','markdown','markdown_inline'}) do assert(s[n], n .. ' parser is not installed') end"
   run_nvim_check "Conform formatters are available." \

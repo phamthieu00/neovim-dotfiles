@@ -37,6 +37,13 @@ Read `docs/architecture.md` before moving responsibility between these areas.
   plugin data, state, or cache.
 - Do not add UI suites, file explorers, extra diagnostics UI, format-on-save,
   snippets collections, or language tooling outside the active milestone.
+- Keep TypeScript, ESLint, Prettier, and package-manager dependencies
+  project-owned. Do not create manifests, lockfiles, or `node_modules` for a
+  user's application.
+- Preserve explicit formatting, ESLint fix-all, and TypeScript source actions;
+  do not introduce save-time mutation without a separately approved policy.
+- Never expose or commit `.env` secrets; fixtures and documentation must use
+  inert placeholder values only.
 
 ## Plugin admission policy
 
@@ -75,8 +82,11 @@ git diff
 git status --short
 ```
 
-For dependency changes, run blocking `:Lazy! sync`, provision the four required
-Mason packages, and inspect `lazy-lock.json` separately. Check for generated
+For dependency changes, run blocking `:Lazy! sync`, provision the six required
+Mason packages, and inspect `lazy-lock.json` separately. The required server
+configs are `lua_ls`, `ts_ls`, `eslint`, and `jsonls`; the required Mason
+packages are `lua-language-server`, `typescript-language-server`, `eslint-lsp`,
+`json-lsp`, `stylua`, and `prettierd`. Check for generated
 data, caches, archives, swap files, and build artifacts inside the repository.
 Report interactive checks that could not be performed; do not imply that a
 headless assertion validated visible UI behavior.

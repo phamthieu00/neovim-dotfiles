@@ -37,8 +37,10 @@ imports six focused specifications; it does not own plugin behavior.
 | `scripts/`, `tests/`, `docs/` | Operations, executable contracts, and design rationale |
 
 `after/lsp/lua_ls.lua` exists because Lua needs Neovim runtime knowledge.
-There is no `ts_ls.lua` because upstream defaults are sufficient, and no empty
-`after/ftplugin/` because empty scaffolding falsely suggests supported behavior.
+`after/lsp/eslint.lua` disables only server formatting so Conform remains the
+single formatting interface. There is no `ts_ls.lua` or `jsonls.lua` because
+their upstream defaults are sufficient, and no empty `after/ftplugin/` because
+empty scaffolding falsely suggests supported behavior.
 
 ## Loading decisions
 
@@ -46,12 +48,18 @@ Treesitter is non-lazy because parsers and `FileType` highlighting must be ready
 deterministically. Telescope loads by command or mapping. Conform loads from its
 mapping, Blink from insert mode or as an LSP dependency, and Gitsigns/LSP load
 for file buffers. LSP configuration runs only after nvim-lspconfig is on the
-runtime path; Mason then installs and automatically enables only `lua_ls` and
-`ts_ls`.
+runtime path; Mason then installs and automatically enables exactly `lua_ls`,
+`ts_ls`, `eslint`, and `jsonls`.
 
 Treesitter's rewritten `main` API owns parser installation. A scoped `FileType`
-autocmd starts highlighting for supported types; indentation, folding, and
-extension plugins are intentionally excluded.
+autocmd starts highlighting for supported types; JSONC reuses the maintained
+JSON parser alias. Indentation, folding, and extension plugins are intentionally
+excluded.
+
+Language servers provide navigation, completion data, diagnostics, and explicit
+code actions. Conform alone selects CLI formatters. There are no save hooks for
+formatting, ESLint fixes, or import organization, which makes file mutation a
+visible user action and leaves project policy in the project.
 
 ## Reproducibility and extension
 
@@ -61,6 +69,8 @@ repository; installer, doctor, and smoke tests reconcile and validate them.
 
 For later language support, add a focused server override only when necessary,
 extend the explicit Mason/parser/formatter lists, and add a real ftplugin only
-for buffer-local settings. Go, Python, Docker, Kubernetes, and Terraform should
-remain independent changes rather than enlarging the shared LSP module with
-language-specific policy.
+for buffer-local settings. Project-local TypeScript, ESLint, and Prettier
+dependencies remain application-owned; Neovim does not create package-manager
+files or install a project dependency tree. Go, Python, Docker, Kubernetes, and
+Terraform should remain independent changes rather than enlarging the shared
+LSP module with language-specific policy.

@@ -40,8 +40,8 @@ Run `make install`. The script:
 5. Symlinks this repository to `~/.config/nvim`.
 6. runs blocking `:Lazy! sync`, which installs plugins, builds native FZF, and
    updates/installs the maintained Treesitter parsers.
-7. Installs `lua-language-server`, `typescript-language-server`, `stylua`, and
-   `prettierd` through Mason.
+7. Installs `lua-language-server`, `typescript-language-server`, `eslint-lsp`,
+   `json-lsp`, `stylua`, and `prettierd` through Mason.
 8. Runs doctor and network-free smoke tests.
 
 If validation fails after a new link is created, the installer removes only its
@@ -53,6 +53,11 @@ If `~/.local/bin` is missing from `PATH`, add:
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
+
+Mason owns editor-facing executables only. Each application still owns its
+TypeScript, ESLint, Prettier, framework, and plugin dependencies through npm,
+pnpm, Yarn, or another project-selected package manager. The editor neither
+creates `node_modules` nor rewrites package manifests.
 
 ## Backups and uninstall
 

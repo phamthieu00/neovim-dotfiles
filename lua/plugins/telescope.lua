@@ -67,6 +67,20 @@ return {
       end,
       desc = "Find diagnostics",
     },
+    {
+      "<leader>fs",
+      function()
+        require("telescope.builtin").lsp_document_symbols()
+      end,
+      desc = "Find document symbols",
+    },
+    {
+      "<leader>fS",
+      function()
+        require("telescope.builtin").lsp_dynamic_workspace_symbols()
+      end,
+      desc = "Find workspace symbols",
+    },
   },
   opts = {},
   config = function(_, opts)

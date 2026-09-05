@@ -16,11 +16,15 @@ Meaningful changes to this project are recorded here.
 - Blink completion, manual Conform formatting, and Gitsigns hunk navigation.
 - Committed plugin lockfile, focused plugin/keymap documentation, Coding MVP
   health checks, fixtures, and network-free runtime smoke tests.
+- TypeScript/Node/NestJS workflow with `eslint` and `jsonls`, project-local tool
+  discovery, explicit source actions, symbol search, and conditional inlay hints.
+- JSONC/YAML formatting, JSONC parsing coverage, language documentation, and a
+  dependency-free decorator-heavy TypeScript fixture.
 
 ### Changed
 
 - Installation now validates Coding MVP prerequisites before changing the
-  configuration link, synchronizes plugins/parsers, and provisions four Mason
+  configuration link, synchronizes plugins/parsers, and provisions six Mason
   packages.
 - Update and CI workflows now maintain and validate plugins, parsers, language
   servers, formatters, and the pinned tree-sitter CLI.

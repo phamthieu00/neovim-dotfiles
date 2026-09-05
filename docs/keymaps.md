@@ -25,6 +25,8 @@ server.
 | `<leader>fr` | Find recently opened files |
 | `<leader>fh` | Search help tags |
 | `<leader>fd` | Search diagnostics |
+| `<leader>fs` | Search symbols in the current document |
+| `<leader>fS` | Dynamically search workspace symbols |
 
 ## LSP and diagnostics
 
@@ -32,11 +34,18 @@ server.
 | --- | --- |
 | `gd` / `gD` | Go to definition / declaration |
 | `gi` / `gr` | Go to implementation / find references |
+| `gy` | Go to type definition |
 | `K` | Show hover documentation |
 | `<leader>rn` | Rename symbol |
 | `<leader>ca` | Request a code action |
+| `<leader>ch` | Toggle inlay hints for the current buffer when supported |
 | `<leader>e` | Show the diagnostic at the cursor |
 | `]d` / `[d` | Jump to next / previous diagnostic |
+
+Inlay hints start disabled. For explicit whole-file actions, use
+`:LspTypescriptSourceAction` for TypeScript source actions such as organizing
+imports and `:LspEslintFixAll` for ESLint fixes. Ordinary cursor/range fixes use
+`<leader>ca`; no action runs on save.
 
 ## Formatting and Git
 

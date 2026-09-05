@@ -1,9 +1,9 @@
 # Neovim Configuration
 
 A small, explicit Neovim 0.12+ development environment maintained as a
-long-lived software project. Milestone 2 adds a deliberately narrow Coding MVP:
-search, syntax parsing, Lua/TypeScript LSP, completion, manual formatting, and
-Git hunk context.
+long-lived software project. Milestone 3A extends the Coding MVP for
+TypeScript, Node.js, and NestJS-style projects without adding another plugin or
+turning editor policy into project policy.
 
 ## Requirements
 
@@ -35,8 +35,10 @@ synchronizes plugins and parsers and installs the required Mason tools.
 ## Coding workflow
 
 - Find files, text, buffers, history, help, and diagnostics with Telescope.
-- Edit Lua and TypeScript with Treesitter highlighting, LSP diagnostics,
-  navigation, and Blink completion.
+- Edit Lua, JavaScript, TypeScript, JSON, and JSONC with Treesitter highlighting,
+  LSP diagnostics, navigation, and Blink completion where supported.
+- Use TypeScript and ESLint source actions explicitly; the editor respects
+  project-local TypeScript, ESLint, Prettier, and configuration files.
 - Format explicitly with `<leader>cf`; format-on-save is intentionally absent.
 - Inspect Git hunks and one-shot blame without adding a file explorer or Git UI.
 
@@ -49,9 +51,9 @@ reference, including Blink's defaults, is in [docs/keymaps.md](docs/keymaps.md).
 init.lua             Seven-line startup orchestrator
 lua/config/          Plugin-independent editor behavior and lazy bootstrap
 lua/plugins/         Six focused Coding MVP specifications
-after/lsp/           Per-server overrides (currently lua_ls only)
+after/lsp/           Focused overrides for lua_ls and eslint
 scripts/             Safe installation and maintenance workflows
-tests/               Network-free runtime smoke tests and fixtures
+tests/               Network-free runtime smoke tests and a lightweight TS fixture
 docs/                Architecture and operational rationale
 .github/workflows/   Reproducible Ubuntu validation
 ```
@@ -61,11 +63,17 @@ See [architecture](docs/architecture.md) and [plugins](docs/plugins.md).
 
 ## Language support
 
-Mason provisions `lua-language-server`, `typescript-language-server`, `stylua`,
-and `prettierd`. The enabled Neovim server identifiers are `lua_ls` and `ts_ls`.
-Lua has a Neovim-aware override; TypeScript uses upstream defaults. This is not
-full language-platform support: Go, Python, Docker, Kubernetes, Terraform, test
-runners, debuggers, and AI tooling remain future milestones.
+Mason provisions `lua-language-server`, `typescript-language-server`,
+`eslint-lsp`, `json-lsp`, `stylua`, and `prettierd`. The enabled Neovim server
+identifiers are `lua_ls`, `ts_ls`, `eslint`, and `jsonls`. TypeScript uses
+upstream project discovery, ESLint diagnostics and fixes remain separate from
+Conform formatting, and JSON completion intentionally has no SchemaStore
+dependency. YAML is formatted but has no LSP; Markdown receives no new language
+tooling. See [languages](docs/languages.md) for project expectations, commands,
+and `.env` handling.
+
+Go, Python, Docker, Kubernetes, Terraform, test runners, debuggers, and AI
+tooling remain future milestones.
 
 ## Commands
 

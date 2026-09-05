@@ -31,7 +31,7 @@ printf 'Updating installed Treesitter parsers.\n'
 printf 'Confirming Mason-managed tools.\n'
 "${NVIM}" --headless \
   '+Lazy! load mason.nvim' \
-  '+MasonInstall lua-language-server typescript-language-server stylua prettierd' \
+  '+MasonInstall lua-language-server typescript-language-server eslint-lsp json-lsp stylua prettierd' \
   +qa
 NVIM_BIN="${NVIM}" "${SCRIPT_DIR}/doctor.sh"
 NVIM_BIN="${NVIM}" "${REPO_ROOT}/tests/smoke-test.sh"

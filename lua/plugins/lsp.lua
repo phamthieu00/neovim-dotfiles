@@ -31,6 +31,7 @@ return {
       group = group,
       desc = "Configure buffer-local LSP mappings",
       callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
         local function map(lhs, rhs, desc)
           vim.keymap.set("n", lhs, rhs, { buffer = args.buf, desc = desc })
         end
@@ -38,6 +39,7 @@ return {
         map("gd", vim.lsp.buf.definition, "Go to definition")
         map("gD", vim.lsp.buf.declaration, "Go to declaration")
         map("gi", vim.lsp.buf.implementation, "Go to implementation")
+        map("gy", vim.lsp.buf.type_definition, "Go to type definition")
         map("gr", vim.lsp.buf.references, "Find references")
         map("K", vim.lsp.buf.hover, "Hover documentation")
         map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
@@ -51,12 +53,19 @@ return {
         map("[d", function()
           vim.diagnostic.jump({ count = -1, float = true })
         end, "Previous diagnostic")
+
+        if client and client:supports_method("textDocument/inlayHint", args.buf) then
+          map("<leader>ch", function()
+            local filter = { bufnr = args.buf }
+            vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled(filter), filter)
+          end, "Toggle inlay hints")
+        end
       end,
     })
 
     require("mason-lspconfig").setup({
-      ensure_installed = { "lua_ls", "ts_ls" },
-      automatic_enable = { "lua_ls", "ts_ls" },
+      ensure_installed = { "lua_ls", "ts_ls", "eslint", "jsonls" },
+      automatic_enable = { "lua_ls", "ts_ls", "eslint", "jsonls" },
     })
   end,
 }

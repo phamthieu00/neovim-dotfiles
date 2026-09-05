@@ -255,7 +255,7 @@ log "Synchronizing plugins and parser revisions."
 log "Installing Mason-managed language servers and formatters."
 "${ACTIVE_NVIM}" --headless \
   '+Lazy! load mason.nvim' \
-  '+MasonInstall lua-language-server typescript-language-server stylua prettierd' \
+  '+MasonInstall lua-language-server typescript-language-server eslint-lsp json-lsp stylua prettierd' \
   +qa
 
 NVIM_BIN="${ACTIVE_NVIM}" "${SCRIPT_DIR}/doctor.sh"
