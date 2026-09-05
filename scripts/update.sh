@@ -23,13 +23,22 @@ fi
 
 printf 'Updating lazy.nvim and managed plugins.\n'
 "${NVIM}" --headless '+Lazy! update' +qa
+printf 'Updating installed Treesitter parsers.\n'
+"${NVIM}" --headless \
+  "+lua require('nvim-treesitter').update():wait(300000)" \
+  "+lua require('nvim-treesitter').install({'lua','vim','vimdoc','bash','json','yaml','javascript','typescript','tsx','markdown','markdown_inline'}):wait(300000)" \
+  +qa
+printf 'Confirming Mason-managed tools.\n'
+"${NVIM}" --headless \
+  '+Lazy! load mason.nvim' \
+  '+MasonInstall lua-language-server typescript-language-server stylua prettierd' \
+  +qa
 NVIM_BIN="${NVIM}" "${SCRIPT_DIR}/doctor.sh"
 NVIM_BIN="${NVIM}" "${REPO_ROOT}/tests/smoke-test.sh"
 
 printf '\nRepository changes after update:\n'
 git status --short
-if [[ -f lazy-lock.json ]]; then
-  git diff -- lazy-lock.json
-else
-  printf 'No lazy-lock.json exists yet; it will be introduced with managed plugins.\n'
-fi
+printf '\nNon-lockfile diff:\n'
+git diff -- . ':(exclude)lazy-lock.json'
+printf '\nlazy-lock.json diff:\n'
+git diff -- lazy-lock.json

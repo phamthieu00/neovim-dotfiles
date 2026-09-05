@@ -1,39 +1,60 @@
 # Maintenance
 
-Keep changes small, reviewable, reversible, documented, and tested.
+Keep updates small, reviewable, reversible, and reproducible.
 
 ## Routine update
+
+Start from a clean worktree:
 
 ```bash
 git switch -c chore/update-neovim
 git pull --ff-only
 make update
-make doctor
-make test
+git diff -- lazy-lock.json
 git diff
 git status --short
 ```
 
-`make update` refuses a dirty worktree. It updates lazy.nvim and any plugins
-managed in future milestones, then runs health and smoke checks. It does not
-create a branch, commit, or update operating-system packages.
+`make update` refuses uncommitted changes. It runs blocking lazy.nvim updates,
+which also execute the Treesitter parser build hook, confirms the four Mason
+packages, runs doctor and smoke tests, and displays repository and lockfile
+changes. It never creates branches or commits and does not update system tools.
 
-There is no repository `lazy-lock.json` while the plugin specification is
-empty. When Milestone 2 introduces plugins, commit that lockfile and inspect its
-diff during every update.
+Treat `lazy-lock.json` as reviewed source: identify each revision movement and
+retain the previous lockfile when an update fails. Mason package and parser
+artifacts are external state validated by tooling rather than committed files.
 
-Avoid combining plugin-manager, language-tooling, and unrelated editor changes
-in one update. If an update fails, retain the old lockfile and investigate on
-the update branch.
+## Health and formatter inspection
 
-## Before completing any change
+Use focused checks inside Neovim:
+
+```vim
+:checkhealth vim.lsp
+:checkhealth telescope
+:checkhealth vim.treesitter
+:checkhealth mason
+:Mason
+:ConformInfo
+```
+
+The doctor verifies hard dependency versions, the config link, startup, plugin
+modules, LSP configs, Mason packages, parsers, formatter availability, and these
+health providers. Smoke tests reuse installed plugin data while isolating
+config, state, and cache, so they do not need network access.
+
+## Before completing a change
 
 ```bash
 bash -n scripts/*.sh tests/*.sh
-make test
 make doctor
+make test
+make test
 git diff --check
+git diff
 git status --short
 ```
 
-Document validation that could not be run and why.
+Compile every changed Lua file with `loadfile()` under Neovim. After install or
+update changes, also run blocking `:Lazy! sync`, reconcile Mason packages, and
+search the repository for caches, downloaded archives, plugin data, swap files,
+and build output. Record anything that could only be checked interactively.

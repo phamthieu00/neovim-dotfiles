@@ -1,0 +1,69 @@
+# Keymaps
+
+The leader is `<Space>` and the local leader is `\`. Plugin mappings live with
+their specifications; LSP mappings exist only in buffers with an attached
+server.
+
+## Core
+
+| Mapping | Mode | Action |
+| --- | --- | --- |
+| `<leader>w` | Normal | Save current file |
+| `<leader>q` | Normal | Quit current window |
+| `<Esc>` | Normal | Clear search highlighting |
+| `<C-h/j/k/l>` | Normal | Focus the left/below/above/right window |
+| `[b` / `]b` | Normal | Previous / next buffer |
+| `<leader>bd` | Normal | Delete current buffer |
+
+## Telescope
+
+| Mapping | Action |
+| --- | --- |
+| `<leader>ff` | Find files, including hidden files but excluding `.git` |
+| `<leader>fg` | Live grep |
+| `<leader>fb` | Find open buffers |
+| `<leader>fr` | Find recently opened files |
+| `<leader>fh` | Search help tags |
+| `<leader>fd` | Search diagnostics |
+
+## LSP and diagnostics
+
+| Mapping | Action |
+| --- | --- |
+| `gd` / `gD` | Go to definition / declaration |
+| `gi` / `gr` | Go to implementation / find references |
+| `K` | Show hover documentation |
+| `<leader>rn` | Rename symbol |
+| `<leader>ca` | Request a code action |
+| `<leader>e` | Show the diagnostic at the cursor |
+| `]d` / `[d` | Jump to next / previous diagnostic |
+
+## Formatting and Git
+
+| Mapping | Mode | Action |
+| --- | --- | --- |
+| `<leader>cf` | Normal or Visual | Format the buffer or selected range asynchronously |
+| `]h` / `[h` | Normal | Jump to next / previous Git hunk |
+| `<leader>hp` | Normal | Preview current Git hunk |
+| `<leader>hb` | Normal | Show full blame for the current line once |
+
+## Blink completion defaults
+
+Blink's `default` preset is used unchanged. These insert-mode mappings are
+effective while completion is active and fall back to normal Neovim behavior
+when Blink cannot handle them:
+
+| Mapping | Action |
+| --- | --- |
+| `<C-Space>` | Trigger completion; toggle documentation when appropriate |
+| `<Up>` / `<C-p>` | Select previous item |
+| `<Down>` / `<C-n>` | Select next item |
+| `<C-y>` | Select and accept the completion |
+| `<C-e>` | Cancel/dismiss completion |
+| `<C-b>` / `<C-f>` | Scroll documentation up / down |
+| `<Tab>` / `<S-Tab>` | Move forward / backward through snippet placeholders |
+
+Documentation also opens automatically after 500 ms. `<C-k>` belongs to the
+preset's signature-help behavior, but signature help is deliberately disabled
+because Blink marks it experimental; it therefore falls back rather than
+opening a signature window.

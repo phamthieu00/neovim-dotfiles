@@ -1,48 +1,68 @@
 # Troubleshooting
 
-Start with:
+Start with `make doctor`. `ERROR` means the Coding MVP contract is broken;
+`WARNING` currently means the optional faster `fd` finder is absent.
 
-```bash
-make doctor
+## A prerequisite is missing or too old
+
+Install the exact category reported by doctor. On Ubuntu, `build-essential`,
+`ripgrep`, and `fd-find` cover the compiler, Make, ripgrep, and optional finder.
+Use a version manager or official distribution for Node.js >= 22.22.2 and the
+official tree-sitter CLI >= 0.26.1. The installer will not replace shared
+runtime toolchains.
+
+## Neovim or PATH is wrong
+
+`make install` can place Neovim 0.12.3 under `~/.local/opt` and link it from
+`~/.local/bin`. Put that directory before older system binaries in `PATH`, then
+open a new shell. The installer refuses to overwrite an unrelated binary or
+symlink at that location.
+
+## Plugin or parser synchronization fails
+
+Check GitHub/network access, compiler and CLI versions, then run:
+
+```vim
+:Lazy sync
+:checkhealth telescope
+:checkhealth vim.treesitter
 ```
 
-`ERROR` entries block a healthy Milestone 1 installation. `WARNING` entries
-describe tools reserved for later coding milestones.
+Telescope remains usable if native FZF fails to load because extension loading
+is protected, but `make` and a compiler are still required by this repository's
+installation contract. Parser failures usually include the parser name and
+compiler output in `:messages` or the Lazy build log.
 
-## Neovim is too old
+## LSP or completion does not attach
 
-Run `make install`. On supported Ubuntu systems it installs the pinned Neovim
-release under `~/.local/opt` and links it from `~/.local/bin`. If the old binary
-still runs, put `~/.local/bin` before system directories in `PATH` and start a
-new shell.
+Open `:Mason` and confirm `lua-language-server` and
+`typescript-language-server` are installed. Then inspect `:checkhealth vim.lsp`
+and `:LspInfo`. Servers normally need a recognizable project root. Blink loads
+as the LSP capability provider; completion behavior can be inspected with
+`:checkhealth blink.cmp`.
 
-## The installer refuses a path
+## Formatting is unavailable
 
-The installer does not replace unrelated `~/.local/bin/nvim` entries. Inspect
-that path and move it yourself only after deciding it is safe. Likewise,
-`make uninstall` refuses a real directory or a symlink owned by another config.
+Run `:ConformInfo` in the affected buffer. Lua uses `stylua`; JavaScript,
+TypeScript, React variants, and JSON select the first available of `prettierd`
+or `prettier`. Mason provides `stylua` and `prettierd`; a project/global
+`prettier` is only a fallback. LSP formatting is used only when no configured
+CLI formatter is available.
 
-## lazy.nvim cannot be cloned
+## File search misses or includes the wrong files
 
-Confirm that Git is available and that GitHub is reachable:
+`<leader>ff` includes hidden files and excludes `.git`. It chooses `fd`, then
+Ubuntu's `fdfind`, then `rg --files`. Confirm the selected executable is on
+`PATH`; use `<leader>fg` for content search.
 
-```bash
-git --version
-git ls-remote https://github.com/folke/lazy.nvim.git HEAD
-```
+## The installer refuses or restores a path
 
-Then rerun `make test`. The smoke test uses temporary XDG directories, so a
-failed clone does not alter normal Neovim data.
+The installer backs up any existing config and restores it if validation of a
+new link fails. `make uninstall` refuses a directory or another repository's
+symlink. Inspect paths and backups manually rather than deleting them.
 
-## Existing configuration disappeared
+## Resetting state
 
-The installer moves it to `~/.config/nvim.backup.TIMESTAMP` and prints the exact
-path. Run `make uninstall`, inspect available backups, and move the intended
-backup back to `~/.config/nvim`.
-
-## Resetting Neovim state
-
-Neovim data, state, and cache can help diagnose plugin bootstrap problems, but
-this project never deletes them automatically. Back them up before manually
-removing anything under `~/.local/share/nvim`, `~/.local/state/nvim`, or
-`~/.cache/nvim`.
+This project never deletes `~/.local/share/nvim`, `~/.local/state/nvim`, or
+`~/.cache/nvim`. Back them up before removing anything manually. Prefer
+`:Lazy clean`, Mason's UI, or targeted parser operations over broad deletion.

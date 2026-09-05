@@ -57,6 +57,8 @@ install_ubuntu_prerequisites() {
   command -v git >/dev/null 2>&1 || packages+=(git)
   command -v curl >/dev/null 2>&1 || packages+=(curl)
   command -v tar >/dev/null 2>&1 || packages+=(tar)
+  command -v gzip >/dev/null 2>&1 || packages+=(gzip)
+  command -v unzip >/dev/null 2>&1 || packages+=(unzip)
   command -v sha256sum >/dev/null 2>&1 || packages+=(coreutils)
   [[ -f /etc/ssl/certs/ca-certificates.crt ]] || packages+=(ca-certificates)
 
@@ -86,12 +88,66 @@ ensure_core_tools() {
 
   local missing=()
   local command_name
-  for command_name in git curl tar sha256sum; do
+  for command_name in git curl tar gzip unzip sha256sum; do
     command -v "${command_name}" >/dev/null 2>&1 || missing+=("${command_name}")
   done
 
   if ((${#missing[@]} > 0)); then
     die "automatic provisioning is currently supported only on Ubuntu; install: ${missing[*]}"
+  fi
+}
+
+version_at_least() {
+  local current=$1 minimum=$2
+  [[ "$(printf '%s\n%s\n' "${minimum}" "${current}" | sort -V | head -n 1)" == "${minimum}" ]]
+}
+
+ensure_coding_tools() {
+  local -a missing=()
+  local node_version tree_sitter_version
+
+  command -v rg >/dev/null 2>&1 || missing+=("ripgrep (rg)")
+  command -v make >/dev/null 2>&1 || missing+=(make)
+  if ! command -v cc >/dev/null 2>&1 \
+    && ! command -v gcc >/dev/null 2>&1 \
+    && ! command -v clang >/dev/null 2>&1; then
+    missing+=("a C compiler")
+  fi
+
+  if command -v node >/dev/null 2>&1; then
+    node_version="$(node --version | sed 's/^v//')"
+    version_at_least "${node_version}" "22.22.2" || missing+=("Node.js >= 22.22.2")
+  else
+    missing+=("Node.js >= 22.22.2")
+  fi
+  command -v npm >/dev/null 2>&1 || missing+=(npm)
+
+  if command -v tree-sitter >/dev/null 2>&1; then
+    tree_sitter_version="$(tree-sitter --version | awk '{ print $2 }')"
+    version_at_least "${tree_sitter_version}" "0.26.1" || missing+=("tree-sitter CLI >= 0.26.1")
+  else
+    missing+=("tree-sitter CLI >= 0.26.1")
+  fi
+
+  if ((${#missing[@]} > 0)); then
+    printf 'ERROR: missing Coding MVP prerequisites:\n' >&2
+    printf '  - %s\n' "${missing[@]}" >&2
+    if [[ "$(uname -s)" == Linux && -r /etc/os-release ]]; then
+      # shellcheck disable=SC1091
+      source /etc/os-release
+      if [[ "${ID:-}" == ubuntu ]]; then
+        printf 'Ubuntu guidance:\n' >&2
+        printf '  sudo apt-get update && sudo apt-get install -y build-essential ripgrep\n' >&2
+        printf '  Install Node.js >= 22.22.2 (with npm) from https://nodejs.org/ or your version manager.\n' >&2
+        printf '  Install tree-sitter CLI >= 0.26.1 from https://github.com/tree-sitter/tree-sitter/releases.\n' >&2
+      fi
+    fi
+    printf 'See docs/installation.md for supported versions and verification commands.\n' >&2
+    exit 1
+  fi
+
+  if ! command -v fd >/dev/null 2>&1 && ! command -v fdfind >/dev/null 2>&1; then
+    log "WARNING: fd is unavailable; Telescope file search will use ripgrep."
   fi
 }
 
@@ -190,10 +246,17 @@ link_configuration() {
 
 ensure_core_tools
 select_neovim
+ensure_coding_tools
 link_configuration
 
-log "Bootstrapping Neovim and lazy.nvim."
-"${ACTIVE_NVIM}" --headless +qa
+log "Synchronizing plugins and parser revisions."
+"${ACTIVE_NVIM}" --headless '+Lazy! sync' +qa
+
+log "Installing Mason-managed language servers and formatters."
+"${ACTIVE_NVIM}" --headless \
+  '+Lazy! load mason.nvim' \
+  '+MasonInstall lua-language-server typescript-language-server stylua prettierd' \
+  +qa
 
 NVIM_BIN="${ACTIVE_NVIM}" "${SCRIPT_DIR}/doctor.sh"
 NVIM_BIN="${ACTIVE_NVIM}" "${REPO_ROOT}/tests/smoke-test.sh"

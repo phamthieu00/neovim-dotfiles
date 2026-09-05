@@ -2,63 +2,81 @@
 
 ## Project goal
 
-Maintain a minimal, explicit, and reproducible Neovim development environment.
-Treat this repository as long-lived software, not as a snippet collection.
+Maintain a minimal, explicit, reproducible Neovim development environment.
+Treat this repository as long-lived software, not a snippet collection.
 
-## Architecture
+## Architecture boundaries
 
-- `init.lua` only sets leaders and loads `lua/config/*`; keep it under 30 lines.
-- `lua/config/` contains plugin-independent options, global mappings, generic
-  autocmds, and lazy.nvim bootstrap logic.
-- `lua/plugins/` is reserved for focused lazy.nvim specifications.
-- `after/lsp/` is reserved for individual language-server configurations.
-- `after/ftplugin/` is reserved for filetype-local editor settings.
-- `scripts/`, `tests/`, and `docs/` own operations, validation, and rationale.
+- Keep `init.lua` as the seven-line leader and module-loading entry point; never
+  put feature logic there.
+- Keep plugin-independent options, mappings, autocmds, and lazy bootstrap in
+  `lua/config/`.
+- Keep one plugin or cohesive integration per file in `lua/plugins/`.
+- Keep server-specific settings in `after/lsp/<server>.lua`; use upstream
+  defaults when no override is needed.
+- Add `after/ftplugin/<filetype>.lua` only for real buffer-local editor settings.
+- Keep operational behavior in scripts and expose only thin Make targets.
+- Do not add empty scaffolding or speculative language configuration.
 
-Do not create future directories until a concrete feature needs them. Read
-`docs/architecture.md` before changing these ownership boundaries.
+Read `docs/architecture.md` before moving responsibility between these areas.
 
 ## Change rules
 
-- Inspect the existing architecture and worktree before editing.
-- Keep changes small, reviewable, reversible, documented, and tested.
-- Avoid giant Lua modules and unrelated edits.
-- Prefer built-in Neovim behavior when it adequately solves the problem.
-- Prefer modern Neovim APIs. LSP work must use `vim.lsp.config()` and
-  `vim.lsp.enable()` rather than deprecated `require("lspconfig").setup()`
-  patterns.
-- Keep language-server settings and filetype settings isolated.
-- Document every new plugin and keymap; update README and detailed docs when
-  behavior changes.
-- Preserve and review `lazy-lock.json` after Milestone 2 introduces it.
-- Never make installer or uninstaller behavior destructive or silently replace
-  unrelated user data.
-- Do not change unrelated files or add speculative features.
+- Inspect the worktree and current behavior before editing.
+- Keep changes focused, reversible, documented, and testable.
+- Prefer built-in Neovim behavior when it solves the problem adequately.
+- Use modern Neovim 0.12 APIs. LSP configuration must use `vim.lsp.config()`
+  and `vim.lsp.enable()` conventions, diagnostics must use
+  `vim.diagnostic.jump()`, and Treesitter highlighting must use
+  `vim.treesitter.start()`.
+- Keep plugin mappings beside their specifications and LSP mappings on
+  `LspAttach`; global plugin-independent mappings belong in `config/keymaps.lua`.
+- Document every plugin, dependency, external requirement, command, and keymap.
+- Preserve and review the committed `lazy-lock.json` separately during updates.
+- Never silently replace or delete unrelated configuration, binaries, backups,
+  plugin data, state, or cache.
+- Do not add UI suites, file explorers, extra diagnostics UI, format-on-save,
+  snippets collections, or language tooling outside the active milestone.
 
-## Plugin policy
+## Plugin admission policy
 
 Before adding a plugin, answer:
 
 1. What concrete problem does it solve?
-2. Can Neovim solve the problem without a plugin?
-3. Can an installed plugin solve it?
-4. What maintenance cost does it add?
-5. Is it actively maintained?
-6. Does it support the targeted Neovim version?
+2. Can Neovim or an installed plugin already solve it?
+3. What runtime, build, and transitive dependencies does it add?
+4. What maintenance and startup cost does it add?
+5. Is it actively maintained and compatible with Neovim 0.12?
+6. How is it validated, documented, updated, and safely removed?
 
-Add the plugin only when the answers justify it. Keep plugin-specific mappings
-with the plugin specification and explain how to remove the plugin.
+Add it only when the answers justify the ongoing ownership cost.
 
-## Validation
+## Installer and tooling policy
 
-Before completing a change, run:
+Check major Coding MVP prerequisites before changing the config symlink. The
+installer may provision transport utilities and pinned Neovim on supported
+Ubuntu systems, but it must not automatically install Node.js, npm, compilers,
+ripgrep, Make, or tree-sitter CLI. Back up existing config paths and restore
+them if validation of a new link fails. Uninstall may remove only a symlink
+resolving to this repository.
+
+## Mandatory validation
+
+Before completing a change, inspect every changed file and run:
 
 ```bash
 bash -n scripts/*.sh tests/*.sh
+make doctor
 make test
+make test
+nvim --headless -u NONE "+lua assert(loadfile('path/to/file.lua'))" +qa
 git diff --check
+git diff
+git status --short
 ```
 
-Run `make doctor` when the installed configuration or external tooling is
-relevant. Report every check that could not run. Inspect `git status` for
-unexpected generated files and review lockfile changes explicitly.
+For dependency changes, run blocking `:Lazy! sync`, provision the four required
+Mason packages, and inspect `lazy-lock.json` separately. Check for generated
+data, caches, archives, swap files, and build artifacts inside the repository.
+Report interactive checks that could not be performed; do not imply that a
+headless assertion validated visible UI behavior.

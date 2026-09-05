@@ -8,7 +8,7 @@ and safe to review.
    `docs/architecture.md`.
 3. Update documentation and the changelog when behavior changes.
 4. Run `make test`, `make doctor` when relevant, and `git diff --check`.
-5. Inspect `lazy-lock.json` separately after plugins are introduced.
+5. Inspect the committed `lazy-lock.json` separately for every plugin change.
 6. Review the complete diff before committing.
 
 Use concise Conventional Commit-style messages when practical:

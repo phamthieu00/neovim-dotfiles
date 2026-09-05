@@ -1,74 +1,74 @@
 # Installation
 
-## Supported path
+## Prerequisites
 
-Automatic provisioning currently supports Ubuntu 22.04 and 24.04 on x86_64
-and arm64. The architecture keeps OS detection isolated so macOS support can be
-added without changing configuration logic.
-
-Run:
+Automatic provisioning supports Ubuntu 22.04 and 24.04 on x86_64 and arm64.
+Before running the installer, install the Coding MVP toolchain:
 
 ```bash
-make install
+sudo apt-get update
+sudo apt-get install -y build-essential fd-find ripgrep
 ```
 
-The installer performs these operations in order:
+Install Node.js >= 22.22.2 with npm using your preferred version manager or the
+official distribution. Install tree-sitter CLI >= 0.26.1 from its official
+release or with a toolchain you control. Confirm:
 
-1. Installs missing Git, cURL, tar, checksum, and certificate packages with
-   `apt-get` (using `sudo` when needed).
-2. Uses an existing Neovim 0.12+ or downloads the pinned Neovim 0.12.3 archive,
-   verifies its SHA-256 checksum, and installs it under `~/.local/opt`.
-3. Creates `~/.local/bin/nvim` only when that path is unused; unrelated files
-   and links are never replaced.
-4. Moves an existing `~/.config/nvim` to a timestamped backup.
-5. Links the repository to `~/.config/nvim`.
-6. Bootstraps lazy.nvim and runs doctor and isolated smoke checks.
+```bash
+node --version
+npm --version
+tree-sitter --version
+rg --version
+make --version
+cc --version
+```
 
-If validation fails after the config link changes, the installer removes its
-link and restores the previous configuration. Re-running a successful install
-is a no-op apart from validation.
+Node, npm, compilers, ripgrep, Make, and tree-sitter are deliberately not
+installed automatically because they are major shared development tools. `fd`
+or Ubuntu's `fdfind` is optional; Telescope falls back to `rg --files`.
 
-If `~/.local/bin` is not on `PATH`, add this to the appropriate shell startup
-file:
+## Install sequence
+
+Run `make install`. The script:
+
+1. Installs missing Git, cURL, tar, gzip, unzip, checksum, and certificate tools
+   through `apt-get` on supported Ubuntu systems.
+2. Uses Neovim 0.12+ or installs verified Neovim 0.12.3 under
+   `~/.local/opt/nvim-v0.12.3`, linking an unused `~/.local/bin/nvim`.
+3. Verifies all major Coding MVP prerequisites before touching the config path.
+4. Moves an existing `~/.config/nvim` to a collision-safe timestamped backup.
+5. Symlinks this repository to `~/.config/nvim`.
+6. runs blocking `:Lazy! sync`, which installs plugins, builds native FZF, and
+   updates/installs the maintained Treesitter parsers.
+7. Installs `lua-language-server`, `typescript-language-server`, `stylua`, and
+   `prettierd` through Mason.
+8. Runs doctor and network-free smoke tests.
+
+If validation fails after a new link is created, the installer removes only its
+own link and restores the previous config. Re-running a successful install is
+idempotent apart from synchronization and validation.
+
+If `~/.local/bin` is missing from `PATH`, add:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-## Backups
+## Backups and uninstall
 
-Backups have names such as:
+Backups look like `~/.config/nvim.backup.20260905-210000`, with a numeric suffix
+on collision. They are never deleted automatically.
 
-```text
-~/.config/nvim.backup.20260905-210000
-```
-
-A numeric suffix avoids collisions. Backups are never deleted automatically.
-
-## Uninstall
-
-```bash
-make uninstall
-```
-
-Uninstall removes `~/.config/nvim` only when it is a symlink to this repository.
-It does not restore a backup automatically because choosing the correct backup
-requires user intent. Restore one after uninstalling with:
+`make uninstall` removes `~/.config/nvim` only when it is a symlink resolving to
+this repository. It preserves data, state, cache, plugins, Mason tools, and
+backups. Restore a chosen backup explicitly:
 
 ```bash
 mv ~/.config/nvim.backup.TIMESTAMP ~/.config/nvim
 ```
 
-The following Neovim-owned directories are preserved:
-
-```text
-~/.local/share/nvim
-~/.local/state/nvim
-~/.cache/nvim
-```
-
 ## Other operating systems
 
-Install Git and Neovim 0.12+ manually, ensure both are on `PATH`, and rerun the
-installer. It will skip Ubuntu provisioning when every core requirement is
-already available.
+Install every prerequisite and Neovim 0.12+ manually, ensure they are on
+`PATH`, then run the installer. Unsupported systems receive explicit missing
+tool guidance; OS dispatch is isolated for future macOS support.

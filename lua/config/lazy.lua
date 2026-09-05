@@ -19,9 +19,10 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  spec = {},
-  -- Milestone 2 will move this into the repository once plugins need locking.
-  lockfile = vim.fn.stdpath("state") .. "/lazy-lock.json",
+  spec = {
+    { import = "plugins" },
+  },
+  lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json",
   checker = { enabled = false },
   change_detection = { notify = false },
 })

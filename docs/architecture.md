@@ -1,8 +1,8 @@
 # Architecture
 
-The configuration uses small modules with one clear owner for each kind of
-behavior. This keeps startup understandable and prevents unrelated features
-from accumulating in a single Lua file.
+The configuration has one clear owner for each kind of behavior. This keeps
+startup inspectable and allows a language or plugin to be changed without
+turning the repository into a framework.
 
 ## Startup flow
 
@@ -13,46 +13,54 @@ init.lua
   -> config/autocmds.lua
   -> config/lazy.lua
        -> lazy.nvim
-       -> plugin specifications (Milestone 2)
+       -> lua/plugins/*.lua
+            -> after/lsp/*.lua (merged by Neovim for enabled servers)
 ```
 
-`init.lua` sets leader keys before mappings or plugins can read them, then
-loads each core module in a predictable order. It contains no behavior of its
-own beyond that orchestration.
+The seven-line `init.lua` sets leaders before any mappings are created, then
+loads core modules in a predictable order. `config/lazy.lua` owns bootstrap and
+imports six focused specifications; it does not own plugin behavior.
 
-## Ownership rules
+## Ownership
 
-- `lua/config/` owns behavior that works without third-party plugins.
-- `lua/plugins/` will own one lazy.nvim specification per plugin or cohesive
-  plugin group.
-- `after/lsp/<server>.lua` will own one language server's settings, using
-  `vim.lsp.config()` and `vim.lsp.enable()` rather than deprecated setup calls.
-- `after/ftplugin/<filetype>.lua` will own buffer-local editor settings for a
-  language or filetype.
-- `scripts/` owns installation and operational workflows; the Makefile only
-  exposes convenient names for those scripts.
+| Location | Responsibility |
+| --- | --- |
+| `lua/config/` | Behavior that works without third-party plugins, plus lazy bootstrap |
+| `lua/plugins/telescope.lua` | Interactive finding and its finder dependencies |
+| `lua/plugins/treesitter.lua` | Parser lifecycle and scoped highlighting |
+| `lua/plugins/lsp.lua` | Shared LSP, diagnostics, Mason, capabilities, and attach mappings |
+| `lua/plugins/completion.lua` | Blink completion behavior |
+| `lua/plugins/format.lua` | Explicit formatter selection and invocation |
+| `lua/plugins/git.lua` | Buffer-local Git signs and hunk mappings |
+| `after/lsp/<server>.lua` | Settings that differ from a server's upstream defaults |
+| `after/ftplugin/<filetype>.lua` | Future buffer-local, filetype-specific editor settings |
+| `scripts/`, `tests/`, `docs/` | Operations, executable contracts, and design rationale |
 
-The last three configuration locations are intentionally not created until a
-feature needs them. Empty scaffolding suggests capabilities the project does
-not yet provide.
+`after/lsp/lua_ls.lua` exists because Lua needs Neovim runtime knowledge.
+There is no `ts_ls.lua` because upstream defaults are sufficient, and no empty
+`after/ftplugin/` because empty scaffolding falsely suggests supported behavior.
 
-## Where a future change belongs
+## Loading decisions
 
-```text
-General editor behavior?          -> lua/config/
-Third-party plugin?               -> lua/plugins/
-Specific language server?         -> after/lsp/
-Filetype-local editor setting?     -> after/ftplugin/
-Installation or maintenance task? -> scripts/
-```
+Treesitter is non-lazy because parsers and `FileType` highlighting must be ready
+deterministically. Telescope loads by command or mapping. Conform loads from its
+mapping, Blink from insert mode or as an LSP dependency, and Gitsigns/LSP load
+for file buffers. LSP configuration runs only after nvim-lspconfig is on the
+runtime path; Mason then installs and automatically enables only `lua_ls` and
+`ts_ls`.
 
-Plugin-specific mappings stay beside their plugin specification. LSP mappings
-are registered on `LspAttach`. Global, plugin-independent mappings remain in
-`lua/config/keymaps.lua`.
+Treesitter's rewritten `main` API owns parser installation. A scoped `FileType`
+autocmd starts highlighting for supported types; indentation, folding, and
+extension plugins are intentionally excluded.
 
-## Reproducibility
+## Reproducibility and extension
 
-lazy.nvim is currently the only third-party component and is bootstrapped from
-its stable branch. Its empty Milestone 1 lock state is kept under Neovim's state
-directory. Milestone 2 will move the lockfile into the repository when actual
-plugin revisions need to be recorded and reviewed.
+`lazy-lock.json` records plugin revisions and belongs in version control. Mason
+packages and Treesitter parsers live under Neovim's data directory, not this
+repository; installer, doctor, and smoke tests reconcile and validate them.
+
+For later language support, add a focused server override only when necessary,
+extend the explicit Mason/parser/formatter lists, and add a real ftplugin only
+for buffer-local settings. Go, Python, Docker, Kubernetes, and Terraform should
+remain independent changes rather than enlarging the shared LSP module with
+language-specific policy.
