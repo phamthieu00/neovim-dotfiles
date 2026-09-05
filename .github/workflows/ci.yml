@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Add user binaries to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Validate shell syntax
+        run: bash -n scripts/*.sh tests/*.sh
+
+      - name: Install configuration and Neovim 0.12.3
+        run: make install
+
+      - name: Run doctor
+        run: make doctor
+
+      - name: Run isolated smoke tests
+        run: make test
