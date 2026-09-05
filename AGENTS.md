@@ -44,6 +44,12 @@ Read `docs/architecture.md` before moving responsibility between these areas.
   do not introduce save-time mutation without a separately approved policy.
 - Never expose or commit `.env` secrets; fixtures and documentation must use
   inert placeholder values only.
+- Telescope is the fuzzy-search owner; Oil is the filesystem-editing owner.
+  Do not add another file-tree plugin or duplicate filesystem shell mappings.
+- Do not add motion plugins before native motions and text objects are shown to
+  be insufficient in a real workflow.
+- Do not add cosmetic plugins, icon dependencies, statuslines, or themes as
+  part of a functional milestone.
 
 ## Plugin admission policy
 
@@ -88,5 +94,7 @@ configs are `lua_ls`, `ts_ls`, `eslint`, and `jsonls`; the required Mason
 packages are `lua-language-server`, `typescript-language-server`, `eslint-lsp`,
 `json-lsp`, `stylua`, and `prettierd`. Check for generated
 data, caches, archives, swap files, and build artifacts inside the repository.
-Report interactive checks that could not be performed; do not imply that a
-headless assertion validated visible UI behavior.
+For Daily UX changes, also assert the four plugin modules, Oil command, `<leader>fe`,
+surround mappings, and which-key group metadata. Report interactive checks that
+could not be performed; do not imply that a headless assertion validated visible
+UI behavior.

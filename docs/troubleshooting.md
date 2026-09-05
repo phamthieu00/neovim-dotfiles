@@ -2,7 +2,7 @@
 
 Start with `make doctor`. `ERROR` means the Coding MVP contract is broken;
 `WARNING` means an optional tool such as the faster `fd` finder or pnpm is
-absent.
+absent, or that Neovim cannot reach a system clipboard provider.
 
 ## A prerequisite is missing or too old
 
@@ -75,6 +75,34 @@ environment values.
 `<leader>ff` includes hidden files and excludes `.git`. It chooses `fd`, then
 Ubuntu's `fdfind`, then `rg --files`. Confirm the selected executable is on
 `PATH`; use `<leader>fg` for content search.
+
+## Oil does not open or save changes
+
+Confirm the `oil.nvim` checkout is installed with `:Lazy` and run `:Oil` from a
+normal buffer. Oil represents a directory as an editable buffer: `<CR>` opens,
+`-` moves to the parent, and `:w` applies pending filesystem edits. Use `g?` in
+an Oil buffer for its built-in actions. The configuration does not add a tree
+sidebar, icons, or shell-command wrappers.
+
+## Pairs or surrounds behave unexpectedly
+
+nvim-autopairs loads on the first Insert mode entry and keeps its default rules;
+check `:messages` after startup and test in a disposable TypeScript buffer.
+Blink handles completion acceptance separately, so do not add an nvim-cmp
+`confirm_done` adapter. For surrounding changes, verify the operator and text
+object separately (`ysiw"`, `ds)`, `cs"'`) and consult `:h nvim-surround.usage`.
+
+## Which-key is missing a label
+
+Run `:checkhealth which-key`, press `<Space>`, and inspect the original mapping's
+`desc` with `:map`. The configuration labels only the `f`, `c`, `b`, and `h`
+prefixes; it does not duplicate mappings just to populate the popup.
+
+## Clipboard warning
+
+Run `make doctor` to see which provider Neovim selected. Install the relevant
+Wayland or X11 utility manually if needed, or continue using Vim's internal
+registers and explicit `"+y`/`"+p` operations. This warning never blocks coding.
 
 ## The installer refuses or restores a path
 

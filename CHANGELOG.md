@@ -20,6 +20,8 @@ Meaningful changes to this project are recorded here.
   discovery, explicit source actions, symbol search, and conditional inlay hints.
 - JSONC/YAML formatting, JSONC parsing coverage, language documentation, and a
   dependency-free decorator-heavy TypeScript fixture.
+- Daily coding UX with Oil filesystem editing, nvim-autopairs, nvim-surround,
+  which-key leader groups, and optional clipboard-provider diagnostics.
 
 ### Changed
 
@@ -28,6 +30,8 @@ Meaningful changes to this project are recorded here.
   packages.
 - Update and CI workflows now maintain and validate plugins, parsers, language
   servers, formatters, and the pinned tree-sitter CLI.
+- The plugin lockfile now records the four focused Daily UX integrations while
+  existing search, completion, formatting, LSP, and Git ownership remains unchanged.
 
 ### Fixed
 

@@ -27,6 +27,10 @@ required_plugins=(
   blink.cmp
   conform.nvim
   gitsigns.nvim
+  oil.nvim
+  nvim-autopairs
+  nvim-surround
+  which-key.nvim
 )
 
 for plugin in "${required_plugins[@]}"; do

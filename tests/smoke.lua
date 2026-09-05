@@ -59,14 +59,35 @@ function M.runtime()
   assert(require("conform"))
   assert(require("gitsigns"))
   assert(require("nvim-treesitter"))
-  vim.cmd("Lazy! load nvim-lspconfig mason.nvim mason-lspconfig.nvim")
+  vim.cmd("Lazy! load nvim-lspconfig mason.nvim mason-lspconfig.nvim oil.nvim nvim-autopairs nvim-surround which-key.nvim")
+  assert(require("oil"))
+  assert(require("nvim-autopairs"))
+  assert(require("nvim-surround"))
+  assert(require("which-key"))
+  local which_key_spec = require("which-key.config").options.spec
+  local expected_groups = {
+    f = "Find / filesystem",
+    c = "Code",
+    b = "Buffers",
+    h = "Git hunks",
+  }
+  for prefix, group in pairs(expected_groups) do
+    local found = false
+    for _, item in ipairs(which_key_spec) do
+      if item[1] == "<leader>" .. prefix and item.group == group then
+        found = true
+        break
+      end
+    end
+    assert(found, "which-key group metadata unavailable for " .. prefix)
+  end
 
   for _, server in ipairs(lsp_servers) do
     assert(vim.lsp.config[server], server .. " config unavailable")
   end
   assert(vim.lsp.config.eslint.settings.format == false, "ESLint formatting must remain disabled")
 
-  for _, command in ipairs({ "Telescope", "ConformInfo", "Mason" }) do
+  for _, command in ipairs({ "Telescope", "ConformInfo", "Mason", "Oil", "WhichKey" }) do
     assert(vim.fn.exists(":" .. command) == 2, command .. " command unavailable")
   end
 
@@ -103,6 +124,7 @@ function M.runtime()
 
   assert_mapping("<leader>fs")
   assert_mapping("<leader>fS")
+  assert_mapping("<leader>fe")
   assert_mapping("<leader>cf")
   for _, filetype in ipairs({
     "javascript",
@@ -116,6 +138,10 @@ function M.runtime()
     assert_formatter_chain(filetype)
   end
   assert(require("conform").formatters_by_ft.markdown == nil, "Markdown formatting must remain disabled")
+
+  for _, lhs in ipairs({ "ys", "ds", "cs" }) do
+    assert(vim.fn.maparg(lhs, "n") ~= "", lhs .. " surround mapping unavailable")
+  end
 end
 
 function M.typescript(fixture_root)

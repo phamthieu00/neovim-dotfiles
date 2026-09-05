@@ -38,7 +38,7 @@ Run `make install`. The script:
 3. Verifies all major Coding MVP prerequisites before touching the config path.
 4. Moves an existing `~/.config/nvim` to a collision-safe timestamped backup.
 5. Symlinks this repository to `~/.config/nvim`.
-6. runs blocking `:Lazy! sync`, which installs plugins, builds native FZF, and
+6. Runs blocking `:Lazy! sync`, which installs plugins, builds native FZF, and
    updates/installs the maintained Treesitter parsers.
 7. Installs `lua-language-server`, `typescript-language-server`, `eslint-lsp`,
    `json-lsp`, `stylua`, and `prettierd` through Mason.
@@ -58,6 +58,11 @@ Mason owns editor-facing executables only. Each application still owns its
 TypeScript, ESLint, Prettier, framework, and plugin dependencies through npm,
 pnpm, Yarn, or another project-selected package manager. The editor neither
 creates `node_modules` nor rewrites package manifests.
+
+Daily UX plugins have no external executables or icon-font requirements. If
+system clipboard integration is useful, install the provider appropriate for
+the session manually, for example `wl-clipboard` on Wayland or `xclip`/`xsel`
+on X11. The installer never adds these optional packages automatically.
 
 ## Backups and uninstall
 

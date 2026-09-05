@@ -119,6 +119,26 @@ run_nvim_check() {
   fi
 }
 
+check_clipboard() {
+  local provider
+
+  if [[ -z "${NVIM}" ]]; then
+    warning "Clipboard provider cannot be checked without Neovim."
+    return
+  fi
+
+  provider="$("${NVIM}" --headless -u NONE \
+    '+lua io.write(vim.fn["provider#clipboard#Executable"]() or "")' +qa 2>/dev/null || true)"
+  provider="${provider//$'\n'/}"
+  if [[ -n "${provider}" ]] && command -v "${provider}" >/dev/null 2>&1; then
+    ok "Clipboard provider ${provider} is available."
+  else
+    warning "No usable system clipboard provider was found; use Vim registers or install wl-clipboard/xclip/xsel."
+  fi
+}
+
+check_clipboard
+
 run_health() {
   local provider="$1"
   local lazy_plugin="${2:-}"
@@ -144,8 +164,8 @@ run_health() {
 if [[ -n "${NVIM}" && -L "${CONFIG_LINK}" ]] \
   && [[ "$(readlink -f -- "${CONFIG_LINK}")" == "${REPO_ROOT}" ]]; then
   run_nvim_check "Neovim starts with the installed configuration."
-  run_nvim_check "Coding MVP modules load." \
-    "+lua assert(require('telescope') and require('blink.cmp') and require('conform') and require('gitsigns') and require('nvim-treesitter'))"
+  run_nvim_check "Coding modules load." \
+    "+lua assert(require('telescope') and require('blink.cmp') and require('conform') and require('gitsigns') and require('nvim-treesitter') and require('oil') and require('nvim-autopairs') and require('nvim-surround') and require('which-key'))"
   run_nvim_check "LSP configurations resolve." \
     "+Lazy! load nvim-lspconfig mason.nvim mason-lspconfig.nvim" \
     "+lua for _,n in ipairs({'lua_ls','ts_ls','eslint','jsonls'}) do assert(vim.lsp.config[n], n .. ' config unavailable') end"
@@ -162,6 +182,7 @@ if [[ -n "${NVIM}" && -L "${CONFIG_LINK}" ]] \
   run_health telescope telescope.nvim
   run_health vim.treesitter
   run_health mason mason.nvim
+  run_health which-key which-key.nvim
 fi
 
 printf 'Doctor summary: %d error(s), %d warning(s).\n' "${ERRORS}" "${WARNINGS}"

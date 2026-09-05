@@ -1,9 +1,9 @@
 # Neovim Configuration
 
 A small, explicit Neovim 0.12+ development environment maintained as a
-long-lived software project. Milestone 3A extends the Coding MVP for
-TypeScript, Node.js, and NestJS-style projects without adding another plugin or
-turning editor policy into project policy.
+long-lived software project. Milestone 4 adds a deliberately small daily coding
+workflow for filesystem edits, paired characters, surround editing, and mapping
+discovery without turning the repository into a Neovim distribution.
 
 ## Requirements
 
@@ -35,8 +35,13 @@ synchronizes plugins and parsers and installs the required Mason tools.
 ## Coding workflow
 
 - Find files, text, buffers, history, help, and diagnostics with Telescope.
+- Browse and edit nearby directories as buffers with Oil; use `<leader>fe` for
+  filesystem operations.
 - Edit Lua, JavaScript, TypeScript, JSON, and JSONC with Treesitter highlighting,
   LSP diagnostics, navigation, and Blink completion where supported.
+- Use native motions and text objects, nvim-surround's `ys`/`ds`/`cs` operators,
+  and nvim-autopairs for routine editing.
+- Press `<Space>` and pause to discover existing leader mappings with which-key.
 - Use TypeScript and ESLint source actions explicitly; the editor respects
   project-local TypeScript, ESLint, Prettier, and configuration files.
 - Format explicitly with `<leader>cf`; format-on-save is intentionally absent.
@@ -50,7 +55,7 @@ reference, including Blink's defaults, is in [docs/keymaps.md](docs/keymaps.md).
 ```text
 init.lua             Seven-line startup orchestrator
 lua/config/          Plugin-independent editor behavior and lazy bootstrap
-lua/plugins/         Six focused Coding MVP specifications
+lua/plugins/         Ten focused plugin specifications
 after/lsp/           Focused overrides for lua_ls and eslint
 scripts/             Safe installation and maintenance workflows
 tests/               Network-free runtime smoke tests and a lightweight TS fixture
@@ -75,6 +80,19 @@ and `.env` handling.
 Go, Python, Docker, Kubernetes, Terraform, test runners, debuggers, and AI
 tooling remain future milestones.
 
+## Daily coding UX
+
+Use Telescope when you know part of a file name or its contents (`<leader>ff`,
+`<leader>fg`). Use Oil when you need to inspect or change nearby filesystem
+structure—create, rename, move, or delete entries in an editable directory
+buffer. `<leader>fb`, `[b`, `]b`, and `<leader>bd` keep buffer navigation simple.
+
+For editing, learn native motions and text objects first. nvim-surround adds
+`ys`, `ds`, and `cs` for changing delimiters, while nvim-autopairs completes
+typed pairs without changing Blink's completion behavior. which-key exposes the
+existing `f`, `c`, `b`, and `h` leader groups; [docs/editing.md](docs/editing.md)
+is the practical walkthrough.
+
 ## Commands
 
 ```bash
@@ -87,7 +105,8 @@ make uninstall  # remove only this repository's config symlink
 
 Inside Neovim, use `:Lazy`, `:Mason`, `:ConformInfo`, and focused
 `:checkhealth vim.lsp`, `:checkhealth telescope`,
-`:checkhealth vim.treesitter`, or `:checkhealth mason` diagnostics.
+`:checkhealth vim.treesitter`, `:checkhealth mason`, or `:checkhealth which-key`
+diagnostics.
 
 ## Development
 

@@ -28,6 +28,16 @@ server.
 | `<leader>fs` | Search symbols in the current document |
 | `<leader>fS` | Dynamically search workspace symbols |
 
+## Filesystem
+
+| Mapping | Action |
+| --- | --- |
+| `<leader>fe` | Open Oil for the current working directory |
+
+Telescope finds files and content; Oil edits nearby filesystem structure. Oil's
+directory-buffer defaults provide navigation and file operations without extra
+global mappings.
+
 ## LSP and diagnostics
 
 | Mapping | Action |
@@ -46,6 +56,25 @@ Inlay hints start disabled. For explicit whole-file actions, use
 `:LspTypescriptSourceAction` for TypeScript source actions such as organizing
 imports and `:LspEslintFixAll` for ESLint fixes. Ordinary cursor/range fixes use
 `<leader>ca`; no action runs on save.
+
+## Surround
+
+These are nvim-surround's default v4 operators rather than project-specific
+leader mappings:
+
+| Mapping | Action |
+| --- | --- |
+| `ys{motion}{char}` | Add a surround, for example `ysiw"` turns `user` into `"user"` |
+| `ds{char}` | Delete a surround, for example `ds)` removes parentheses |
+| `cs{target}{replacement}` | Change one, for example `cs"'` changes double to single quotes |
+
+Use native text objects such as `iw`, `a"`, and `i(` with these operators.
+
+## Which-key groups
+
+Press `<Space>` and pause to discover the existing groups: `f` (Find /
+filesystem), `c` (Code), `b` (Buffers), and `h` (Git hunks). which-key labels
+these prefixes; this document remains the canonical full reference.
 
 ## Formatting and Git
 

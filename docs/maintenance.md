@@ -20,6 +20,10 @@ which also execute the Treesitter parser build hook, confirms the six Mason
 packages, runs doctor and smoke tests, and displays repository and lockfile
 changes. It never creates branches or commits and does not update system tools.
 
+Review the four Milestone 4 lockfile entries independently. A plugin update is
+not complete until its startup behavior, mappings, and removal path remain
+documented.
+
 Treat `lazy-lock.json` as reviewed source: identify each revision movement and
 retain the previous lockfile when an update fails. Mason package and parser
 artifacts are external state validated by tooling rather than committed files.
@@ -33,13 +37,14 @@ Use focused checks inside Neovim:
 :checkhealth telescope
 :checkhealth vim.treesitter
 :checkhealth mason
+:checkhealth which-key
 :Mason
 :ConformInfo
 ```
 
 The doctor verifies hard dependency versions, the config link, startup, plugin
-modules, LSP configs, Mason packages, parsers, formatter availability, and these
-health providers. Smoke tests reuse installed plugin data while isolating
+modules, LSP configs, Mason packages, parsers, formatter availability, clipboard
+provider, and these health providers. Smoke tests reuse installed plugin data while isolating
 config, state, and cache, so they do not need network access.
 
 ## Before completing a change
