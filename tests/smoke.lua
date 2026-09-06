@@ -59,13 +59,41 @@ function M.runtime()
   assert(require("conform"))
   assert(require("gitsigns"))
   assert(require("nvim-treesitter"))
-  vim.cmd("Lazy! load nvim-lspconfig mason.nvim mason-lspconfig.nvim oil.nvim nvim-autopairs nvim-surround which-key.nvim")
+  vim.cmd("Lazy! load nvim-lspconfig mason.nvim mason-lspconfig.nvim oil.nvim nvim-autopairs nvim-surround which-key.nvim noice.nvim bufferline.nvim nvim-web-devicons persistence.nvim claude-code.nvim codex.nvim")
   assert(require("oil"))
   assert(require("nvim-autopairs"))
   assert(require("nvim-surround"))
   assert(require("which-key"))
+  assert(require("catppuccin"))
+  assert(vim.g.colors_name == "catppuccin-mocha", "Catppuccin colorscheme is not active")
+  assert(require("noice"))
+  assert(require("bufferline"))
+  assert(require("nvim-web-devicons"))
+  assert(vim.opt.showtabline:get() == 2, "bufferline must keep open buffers visible")
+  assert(require("persistence"))
+  assert(require("claude-code"))
+  assert(require("claude-code").config.window.position == "vertical", "Claude Code must use a right-side vertical panel")
+  assert(require("claude-code").config.window.split_ratio == 0.35, "Claude Code panel width changed unexpectedly")
+  assert(require("codex"))
+  local codex_config = require("codex.config").get()
+  assert(codex_config.terminal.layout == "split", "Codex must use a split terminal")
+  assert(codex_config.terminal.split_side == "right", "Codex must open on the right")
+  assert(codex_config.terminal.split_width_percentage == 0.35, "Codex panel width changed unexpectedly")
+  for _, command in ipairs({ "ClaudeCode", "ClaudeCodeContinue", "Codex", "CodexFocus", "CodexAdd", "CodexHealth" }) do
+    assert(vim.fn.exists(":" .. command) == 2, command .. " command unavailable")
+  end
+  for _, mapping in ipairs({ "<Space>qs", "<Space>qS", "<Space>ql", "<Space>qd", "<Space>ac", "<Space>cC", "<Space>ax", "<Space>ab" }) do
+    assert(vim.fn.maparg(mapping, "n") ~= "", mapping .. " mapping unavailable")
+  end
+  -- Noice defers setup until VimEnter in headless startup; replay that event
+  -- here so command registration is tested without a timing sleep.
+  vim.api.nvim_exec_autocmds("VimEnter", { modeline = false })
+  assert(vim.wait(1000, function()
+    return vim.fn.exists(":Noice") == 2
+  end), "Noice command unavailable")
   local which_key_spec = require("which-key.config").options.spec
   local expected_groups = {
+    a = "AI agents",
     f = "Find / filesystem",
     c = "Code",
     b = "Buffers",
@@ -87,9 +115,10 @@ function M.runtime()
   end
   assert(vim.lsp.config.eslint.settings.format == false, "ESLint formatting must remain disabled")
 
-  for _, command in ipairs({ "Telescope", "ConformInfo", "Mason", "Oil", "WhichKey" }) do
+  for _, command in ipairs({ "Telescope", "ConformInfo", "Mason", "Oil", "WhichKey", "Noice" }) do
     assert(vim.fn.exists(":" .. command) == 2, command .. " command unavailable")
   end
+  assert(require("noice.config").options.cmdline.view == "cmdline_popup", "Noice cmdline popup is not enabled")
 
   local registry = require("mason-registry")
   for _, package in ipairs(mason_packages) do

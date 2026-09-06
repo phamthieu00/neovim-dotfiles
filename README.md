@@ -1,22 +1,21 @@
 # Neovim Configuration
 
 A small, explicit Neovim 0.12+ development environment maintained as a
-long-lived software project. Milestone 4 adds a deliberately small daily coding
-workflow for filesystem edits, paired characters, surround editing, and mapping
-discovery without turning the repository into a Neovim distribution.
+long-lived software project.
 
 ## Requirements
 
-- Ubuntu 22.04 or 24.04 for automatic transport-tool and Neovim provisioning
+- Ubuntu 22.04/24.04 or macOS on x86_64/arm64 for automatic provisioning
 - Git, cURL, tar, gzip, unzip, and SHA-256 utilities
 - Neovim 0.12+ (the automated path pins 0.12.3)
-- ripgrep, GNU Make, and a C compiler
+- ripgrep, Make, and a C compiler
 - Node.js >= 22.22.2 and npm
 - tree-sitter CLI >= 0.26.1
 - `fd` or Ubuntu's `fdfind` is optional; file search falls back to ripgrep
 - network access while installing or updating
 
-The installer provisions only small transport packages and Neovim. It reports
+On macOS, `make install` can bootstrap Homebrew and the required Coding MVP
+tools. On Ubuntu, it provisions only transport packages and Neovim, reporting
 exact guidance for major runtimes and build tools instead of changing them.
 See [installation](docs/installation.md) for details.
 
@@ -45,7 +44,7 @@ synchronizes plugins and parsers and installs the required Mason tools.
 - Use TypeScript and ESLint source actions explicitly; the editor respects
   project-local TypeScript, ESLint, Prettier, and configuration files.
 - Format explicitly with `<leader>cf`; format-on-save is intentionally absent.
-- Inspect Git hunks and one-shot blame without adding a file explorer or Git UI.
+- Inspect Git hunks and one-shot blame without adding a second Git UI.
 
 The leader is `<Space>` and the local leader is `\`. The complete mapping
 reference, including Blink's defaults, is in [docs/keymaps.md](docs/keymaps.md).
@@ -55,7 +54,7 @@ reference, including Blink's defaults, is in [docs/keymaps.md](docs/keymaps.md).
 ```text
 init.lua             Seven-line startup orchestrator
 lua/config/          Plugin-independent editor behavior and lazy bootstrap
-lua/plugins/         Ten focused plugin specifications
+lua/plugins/         Focused plugin specifications, one owner per feature
 after/lsp/           Focused overrides for lua_ls and eslint
 scripts/             Safe installation and maintenance workflows
 tests/               Network-free runtime smoke tests and a lightweight TS fixture
@@ -77,8 +76,9 @@ dependency. YAML is formatted but has no LSP; Markdown receives no new language
 tooling. See [languages](docs/languages.md) for project expectations, commands,
 and `.env` handling.
 
-Go, Python, Docker, Kubernetes, Terraform, test runners, debuggers, and AI
-tooling remain future milestones.
+Go, Python, Docker, Kubernetes, Terraform, test runners, and debuggers remain
+future milestones. Claude Code and Codex CLI integrations are available as
+optional AI front ends; their CLIs and authentication remain user-managed.
 
 ## Daily coding UX
 
@@ -86,12 +86,26 @@ Use Telescope when you know part of a file name or its contents (`<leader>ff`,
 `<leader>fg`). Use Oil when you need to inspect or change nearby filesystem
 structure—create, rename, move, or delete entries in an editable directory
 buffer. `<leader>fb`, `[b`, `]b`, and `<leader>bd` keep buffer navigation simple.
+The bufferline keeps all open buffers visible at the top.
+Persistence restores the current project session automatically; native
+quickfix/location lists and undo history remain available without extra UI
+plugins.
 
-For editing, learn native motions and text objects first. nvim-surround adds
+For editing, learn native motions and text objects first. Catppuccin Mocha
+provides the active color scheme. nvim-surround adds
 `ys`, `ds`, and `cs` for changing delimiters, while nvim-autopairs completes
 typed pairs without changing Blink's completion behavior. which-key exposes the
-existing `f`, `c`, `b`, and `h` leader groups; [docs/editing.md](docs/editing.md)
+existing `a`, `f`, `c`, `b`, and `h` leader groups. Oil shows file icons, and Noice
+renders `:` as a centered command-line popup. Persistence restores the current
+project session automatically when plain `nvim` or `nvim .` is launched. [docs/editing.md](docs/editing.md)
 is the practical walkthrough.
+
+For AI-assisted work, `<leader>ac` opens Claude Code in a right-side panel and
+`<leader>cC` continues its latest conversation there. `<leader>ax` focuses Codex; `<leader>ab` adds the
+current buffer and visual `<leader>aa`/`<leader>as` add or send a selection.
+These mappings launch the existing `claude` or `codex` CLI only when invoked.
+Both agents open in resizable right-side panels. Install and authenticate those
+tools separately, and review agent changes with Git signs and native diffs.
 
 ## Commands
 
@@ -100,10 +114,11 @@ make install    # link, synchronize, provision, and validate
 make doctor     # check dependencies, tools, packages, parsers, and health
 make test       # run two network-free isolated starts and runtime assertions
 make update     # update from a clean worktree and show lockfile changes
-make uninstall  # remove only this repository's config symlink
+make uninstall  # remove the link and only marked project-owned plugin data
 ```
 
-Inside Neovim, use `:Lazy`, `:Mason`, `:ConformInfo`, and focused
+Inside Neovim, use `:Lazy`, `:Mason`, `:ConformInfo`, `:Noice`, `:ClaudeCode`,
+`:Codex`, `:CodexHealth`, and focused
 `:checkhealth vim.lsp`, `:checkhealth telescope`,
 `:checkhealth vim.treesitter`, `:checkhealth mason`, or `:checkhealth which-key`
 diagnostics.

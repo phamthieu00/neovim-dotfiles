@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd -P)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
 NVIM="${NVIM_BIN:-$(command -v nvim || true)}"
 
-cd -- "${REPO_ROOT}"
+cd "${REPO_ROOT}"
 
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 \
   || { printf 'ERROR: update must run inside a Git worktree.\n' >&2; exit 1; }

@@ -5,6 +5,10 @@
 Maintain a minimal, explicit, reproducible Neovim development environment.
 Treat this repository as long-lived software, not a snippet collection.
 
+The current workflow is a selective, modern Neovim configuration. Keep its
+ownership boundaries explicit and never edit a user's shell configuration as
+part of a Neovim change.
+
 ## Architecture boundaries
 
 - Keep `init.lua` as the seven-line leader and module-loading entry point; never
@@ -49,7 +53,10 @@ Read `docs/architecture.md` before moving responsibility between these areas.
 - Do not add motion plugins before native motions and text objects are shown to
   be insufficient in a real workflow.
 - Do not add cosmetic plugins, icon dependencies, statuslines, or themes as
-  part of a functional milestone.
+  part of a functional milestone unless the user explicitly requests them.
+- AI CLI integrations are allowed only when explicitly requested. Keep Claude
+  Code and Codex bridges separate, lazy, and removable; never commit API keys,
+  CLI state, prompts, transcripts, or shell auto-start configuration.
 
 ## Plugin admission policy
 
@@ -68,10 +75,12 @@ Add it only when the answers justify the ongoing ownership cost.
 
 Check major Coding MVP prerequisites before changing the config symlink. The
 installer may provision transport utilities and pinned Neovim on supported
-Ubuntu systems, but it must not automatically install Node.js, npm, compilers,
-ripgrep, Make, or tree-sitter CLI. Back up existing config paths and restore
-them if validation of a new link fails. Uninstall may remove only a symlink
-resolving to this repository.
+Ubuntu systems. On macOS, the explicit one-command installer may bootstrap
+Homebrew and the required Coding MVP tools; never edit shell startup files.
+Back up existing config paths and restore them if validation of a new link
+fails. Uninstall may remove only a symlink resolving to this repository and
+project-owned plugin data recorded by the install ownership marker; preserve
+unrelated Neovim data, backups, and user-managed runtimes.
 
 ## Mandatory validation
 
@@ -94,7 +103,10 @@ configs are `lua_ls`, `ts_ls`, `eslint`, and `jsonls`; the required Mason
 packages are `lua-language-server`, `typescript-language-server`, `eslint-lsp`,
 `json-lsp`, `stylua`, and `prettierd`. Check for generated
 data, caches, archives, swap files, and build artifacts inside the repository.
-For Daily UX changes, also assert the four plugin modules, Oil command, `<leader>fe`,
-surround mappings, and which-key group metadata. Report interactive checks that
-could not be performed; do not imply that a headless assertion validated visible
-UI behavior.
+For Daily UX changes, also assert the plugin modules, Oil command, `<leader>fe`,
+bufferline loading, surround mappings, which-key group metadata, and any
+explicitly requested UI additions such as icons or command-line rendering.
+For explicitly requested AI integrations, assert their modules, lazy command
+stubs, documented mappings, and clean startup without invoking either CLI.
+Report interactive checks that could not be performed; do not imply that a
+headless assertion validated visible UI behavior.

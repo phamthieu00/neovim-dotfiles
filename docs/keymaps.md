@@ -12,6 +12,8 @@ server.
 | `<leader>q` | Normal | Quit current window |
 | `<Esc>` | Normal | Clear search highlighting |
 | `<C-h/j/k/l>` | Normal | Focus the left/below/above/right window |
+| `+` / `_` | Normal | Increase / decrease the current window width |
+| `=` / `-` | Normal | Increase / decrease the current window height |
 | `[b` / `]b` | Normal | Previous / next buffer |
 | `<leader>bd` | Normal | Delete current buffer |
 
@@ -72,9 +74,32 @@ Use native text objects such as `iw`, `a"`, and `i(` with these operators.
 
 ## Which-key groups
 
-Press `<Space>` and pause to discover the existing groups: `f` (Find /
-filesystem), `c` (Code), `b` (Buffers), and `h` (Git hunks). which-key labels
-these prefixes; this document remains the canonical full reference.
+Press `<Space>` and pause to discover the existing groups: `a` (AI agents), `f`
+(Find / filesystem), `c` (Code), `b` (Buffers), and `h` (Git hunks). which-key
+labels these prefixes; this document remains the canonical full reference.
+
+## AI coding agents
+
+| Mapping | Mode | Action |
+| --- | --- | --- |
+| `<leader>ac` | Normal | Toggle the Claude Code terminal |
+| `<leader>cC` | Normal | Continue the latest Claude Code conversation in the right panel |
+| `<leader>ax` | Normal | Focus or hide the Codex session |
+| `<leader>ab` | Normal | Add the current buffer to Codex |
+| `<leader>aa` | Visual | Add the selection to the Codex prompt |
+| `<leader>as` | Visual | Send the selection to Codex |
+
+These mappings only launch a CLI when used. Install and authenticate Claude
+Code or Codex independently; no credentials are stored in this repository.
+Both agents use resizable right-side splits. With the cursor in an agent
+terminal, press `<C-\><C-n>` to enter terminal Normal mode, then use `+`/`_`
+for width or drag the split edge because `mouse=a` is enabled.
+
+Persistence automatically restores the current directory's last session when
+you run plain `nvim` or `nvim .`. Use `<leader>qs` to retry the
+current session manually, `<leader>qS` to choose another one, `<leader>ql` to
+load the most recently saved session, and `<leader>qd` to stop saving for the
+current Neovim process.
 
 ## Formatting and Git
 

@@ -62,21 +62,36 @@ the comment syntax; no comment plugin is installed.
 
 ## Buffers
 
-Buffers are ordinary open files, not permanent tabs. Use `[b` and `]b` to move
-between buffers, `<leader>fb` to find one with Telescope, and `<leader>bd` to
-delete the current buffer using native `:bdelete`.
+Buffers are ordinary open files, not permanent tabs. The bufferline at the top
+keeps open buffers visible; use `[b` and `]b` to move between them,
+`<leader>fb` to find one with Telescope, and `<leader>bd` to delete the current
+buffer using native `:bdelete`.
+
+Opening two buffers does not automatically create two windows. To start with
+two files side by side from a shell, use `nvim -O file1 file2`; inside Neovim,
+use `:vsplit file2`. Use `nvim -o`/`:split` for horizontal windows, or
+`nvim -p file1 file2`/`:tabedit file2` for separate tab pages. The `<C-h/j/k/l>`
+mappings move between windows; `[b` and `]b` switch buffers in the current
+window.
 
 ## Windows
 
 Use `<C-h>`, `<C-j>`, `<C-k>`, and `<C-l>` to focus the neighboring window.
 Native commands remain available for layout changes: `:split`, `:vsplit`,
-`:close`, and `:only`. No window manager or resize plugin is included.
+`:close`, and `:only`. In Normal mode, `+`/`_` resize width and `=`/`-`
+resize height. Agent panels are ordinary resizable right-side splits; in a
+terminal buffer first press `<C-\><C-n>`, or drag the split edge with the mouse.
+No window manager or resize plugin is included.
 
 ## Filesystem and search
 
 - `<leader>fe` opens Oil in the current working directory. Treat the directory
   as an editable buffer: press `<CR>` to open, `-` to go up, edit names or
-  entries, then `:w` to apply create/rename/move/delete operations.
+  entries, then `:w` to apply create/rename/move/delete operations. In Oil,
+  `<C-s>` opens the selected file in a vertical split, `<C-h>` in a horizontal
+  split, and `<C-t>` in a new tab. File icons are provided by
+  `nvim-web-devicons` when
+  the terminal font supports them.
 - `<leader>ff` uses Telescope to fuzzy-find a file when you know part of its
   name.
 - `<leader>fg` searches repository contents. `/`, `n`, and `N` remain the right
@@ -104,3 +119,12 @@ Press `<Space>` and pause to see which-key's labels for the `f` (Find /
 filesystem), `c` (Code), `b` (Buffers), and `h` (Git hunks) groups. Existing
 mapping descriptions are the source of truth, so [docs/keymaps.md](keymaps.md)
 remains the complete reference.
+
+The `:` command line is rendered as a centered popup by Noice. Use `:Noice` to
+open message history and `:checkhealth noice` when the popup is unavailable.
+
+Bufferline keeps open buffers visible without replacing native windows. Persistence
+provides `<leader>qs` to load the current session, `<leader>qS` to select one,
+`<leader>ql` to load the last session, and `<leader>qd` to stop saving. Native
+quickfix, location-list, and undo commands remain available without extra UI
+wrappers.

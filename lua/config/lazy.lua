@@ -1,5 +1,7 @@
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 
+require("config.node")
+
 if not vim.uv.fs_stat(lazypath) then
   local repository = "https://github.com/folke/lazy.nvim.git"
   local output = vim.fn.system({

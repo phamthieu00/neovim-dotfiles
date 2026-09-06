@@ -1,6 +1,9 @@
 return {
   "stevearc/oil.nvim",
   lazy = false,
+  dependencies = {
+    "nvim-tree/nvim-web-devicons",
+  },
   keys = {
     {
       "<leader>fe",
@@ -8,5 +11,7 @@ return {
       desc = "Explore files",
     },
   },
-  opts = {},
+  opts = {
+    columns = { "icon" },
+  },
 }

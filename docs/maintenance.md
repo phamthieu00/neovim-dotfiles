@@ -20,9 +20,14 @@ which also execute the Treesitter parser build hook, confirms the six Mason
 packages, runs doctor and smoke tests, and displays repository and lockfile
 changes. It never creates branches or commits and does not update system tools.
 
-Review the four Milestone 4 lockfile entries independently. A plugin update is
-not complete until its startup behavior, mappings, and removal path remain
-documented.
+Review each daily editing entry and the Catppuccin theme entry independently. A
+plugin update is not complete until its startup behavior, mappings, and removal
+path remain documented. The icon, Noice, and bufferline entries should be
+reviewed separately because they change terminal rendering, command-line
+behavior, or buffer visibility.
+The Claude Code and Codex entries should be reviewed separately: their CLI
+protocols, command surfaces, and external authentication are outside Lazy's
+lockfile and are never upgraded by the installer.
 
 Treat `lazy-lock.json` as reviewed source: identify each revision movement and
 retain the previous lockfile when an update fails. Mason package and parser
@@ -40,6 +45,9 @@ Use focused checks inside Neovim:
 :checkhealth which-key
 :Mason
 :ConformInfo
+:Noice
+:ClaudeCode
+:CodexHealth
 ```
 
 The doctor verifies hard dependency versions, the config link, startup, plugin

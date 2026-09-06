@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd -P)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
 NVIM="${NVIM_BIN:-$(command -v nvim || true)}"
-DATA_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}"
-NVIM_DATA="${DATA_HOME}/nvim"
+if [[ -n "${XDG_DATA_HOME:-}" ]]; then
+  NVIM_DATA="${XDG_DATA_HOME}/nvim"
+elif [[ "$(uname -s)" == Darwin ]]; then
+  NVIM_DATA="${HOME}/Library/Application Support/nvim"
+else
+  NVIM_DATA="${HOME}/.local/share/nvim"
+fi
+DATA_HOME="$(dirname "${NVIM_DATA}")"
 TEMP_ROOT="$(mktemp -d)"
 
 cleanup() {
-  rm -rf -- "${TEMP_ROOT}"
+  rm -rf "${TEMP_ROOT}"
 }
 trap cleanup EXIT
 
@@ -31,6 +37,14 @@ required_plugins=(
   nvim-autopairs
   nvim-surround
   which-key.nvim
+  catppuccin
+  nui.nvim
+  noice.nvim
+  bufferline.nvim
+  nvim-web-devicons
+  persistence.nvim
+  claude-code.nvim
+  codex.nvim
 )
 
 for plugin in "${required_plugins[@]}"; do
@@ -41,8 +55,8 @@ for plugin in "${required_plugins[@]}"; do
   fi
 done
 
-mkdir -p -- "${TEMP_ROOT}/config" "${TEMP_ROOT}/state" "${TEMP_ROOT}/cache"
-ln -s -- "${REPO_ROOT}" "${TEMP_ROOT}/config/nvim"
+mkdir -p "${TEMP_ROOT}/config" "${TEMP_ROOT}/state" "${TEMP_ROOT}/cache"
+ln -s "${REPO_ROOT}" "${TEMP_ROOT}/config/nvim"
 
 run_nvim() {
   env \

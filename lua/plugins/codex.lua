@@ -1,0 +1,47 @@
+return {
+  "nwiizo/codex.nvim",
+  cmd = {
+    "Codex",
+    "CodexOpen",
+    "CodexFocus",
+    "CodexResume",
+    "CodexContinue",
+    "CodexFork",
+    "CodexReview",
+    "CodexImage",
+    "CodexPrompt",
+    "CodexSend",
+    "CodexSendVisual",
+    "CodexAddVisual",
+    "CodexAdd",
+    "CodexTreeAdd",
+    "CodexDiff",
+    "CodexInterrupt",
+    "CodexStatus",
+    "CodexStop",
+    "CodexHealth",
+  },
+  keys = {
+    { "<leader>ax", "<cmd>CodexFocus<cr>", desc = "Codex: focus or hide" },
+    { "<leader>ab", "<cmd>CodexAdd<cr>", desc = "Codex: add current buffer" },
+    {
+      "<leader>aa",
+      ":<C-U>CodexAddVisual<CR>",
+      mode = "v",
+      desc = "Codex: add selection",
+    },
+    {
+      "<leader>as",
+      ":<C-U>CodexSendVisual<CR>",
+      mode = "v",
+      desc = "Codex: send selection",
+    },
+  },
+  opts = {
+    terminal = {
+      layout = "split",
+      split_side = "right",
+      split_width_percentage = 0.35,
+    },
+  },
+}

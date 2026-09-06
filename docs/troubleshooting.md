@@ -46,6 +46,12 @@ or supported workspace root and inspect which TypeScript version the server
 selected. The upstream server uses a workspace TypeScript installation when
 available and otherwise falls back to its bundled version.
 
+`ts_ls` is the nvim-lspconfig server identifier, not a Mason package name.
+Install or retry the corresponding Mason package with
+`:MasonInstall typescript-language-server`. If Mason reports `npm` as `ENOENT`
+or an LSP exits with code 127, install Node.js >= 22.22.2 with npm and ensure
+both `node` and `npm` are visible in the same shell that starts Neovim.
+
 For ESLint, keep the ESLint library and a flat or legacy ESLint configuration
 in the project. In a monorepo, open Neovim from the workspace and inspect the
 client root/working directory in `:LspInfo`. Use `:LspEslintFixAll` only when an
@@ -82,7 +88,7 @@ Confirm the `oil.nvim` checkout is installed with `:Lazy` and run `:Oil` from a
 normal buffer. Oil represents a directory as an editable buffer: `<CR>` opens,
 `-` moves to the parent, and `:w` applies pending filesystem edits. Use `g?` in
 an Oil buffer for its built-in actions. The configuration does not add a tree
-sidebar, icons, or shell-command wrappers.
+sidebar or shell-command wrappers.
 
 ## Pairs or surrounds behave unexpectedly
 
@@ -95,14 +101,43 @@ object separately (`ysiw"`, `ds)`, `cs"'`) and consult `:h nvim-surround.usage`.
 ## Which-key is missing a label
 
 Run `:checkhealth which-key`, press `<Space>`, and inspect the original mapping's
-`desc` with `:map`. The configuration labels only the `f`, `c`, `b`, and `h`
-prefixes; it does not duplicate mappings just to populate the popup.
+`desc` with `:map`. The configuration labels only the `a`, `f`, `c`, `b`, and
+`h` prefixes; it does not duplicate mappings just to populate the popup.
+
+## Icons or command line are missing
+
+Oil and bufferline icons come from `nvim-web-devicons`; use a Nerd
+Font and inspect `:Lazy`/`:messages` if symbols render as boxes. The
+`:` command line is centered by Noice's `cmdline_popup` view.
+Run `:checkhealth noice` and inspect `:Lazy` if it appears at the native bottom
+position. `:Noice` opens its message history; removing Noice intentionally
+restores Neovim's native command-line.
 
 ## Clipboard warning
 
 Run `make doctor` to see which provider Neovim selected. Install the relevant
 Wayland or X11 utility manually if needed, or continue using Vim's internal
 registers and explicit `"+y`/`"+p` operations. This warning never blocks coding.
+
+## AI CLI integrations
+
+The Claude Code and Codex plugins are lazy, so a missing CLI does not prevent
+Neovim from starting. `make doctor` reports missing `claude` or `codex` as a
+warning. Install and authenticate the CLI in the shell environment that starts
+Neovim, then verify with:
+
+```bash
+command -v claude && claude --version
+command -v codex && codex --version
+```
+
+Inside Neovim, use `:ClaudeCode` or `:ClaudeCodeContinue` for Claude and
+`:Codex`, `:CodexStatus`, or `:CodexHealth` for Codex. If a terminal does not
+open, inspect `:messages` and confirm the command is available from Neovim's
+`$PATH`; do not add credentials or shell auto-start hooks to this repository.
+The Codex integration is community maintained, so CLI protocol changes may
+require a plugin update. Review the CLI's own auth/configuration files rather
+than committing them here.
 
 ## The installer refuses or restores a path
 
@@ -112,6 +147,14 @@ symlink. Inspect paths and backups manually rather than deleting them.
 
 ## Resetting state
 
-This project never deletes `~/.local/share/nvim`, `~/.local/state/nvim`, or
-`~/.cache/nvim`. Back them up before removing anything manually. Prefer
-`:Lazy clean`, Mason's UI, or targeted parser operations over broad deletion.
+`make uninstall` removes only the plugin/Mason/site paths and state/cache paths
+recorded by this repository's ownership marker. It preserves unrelated files
+under the Neovim roots. If the marker is absent, it leaves all plugin/data
+directories untouched; prefer `:Lazy clean`, Mason's UI, or targeted parser
+operations for manual cleanup.
+
+## Restoring work automatically
+
+Enter the project directory and run plain `nvim` or `nvim .`. Persistence
+restores that directory's saved Neovim layout automatically. Opening
+`nvim some-file.ts` intentionally skips restore so the explicit file wins.
