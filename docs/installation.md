@@ -4,19 +4,22 @@
 
 Automatic provisioning supports Ubuntu 22.04/24.04 and macOS on x86_64 and
 arm64. On macOS, the installer bootstraps Homebrew when necessary and installs
-the required transport and Coding MVP tools in one command. On Ubuntu, major
-shared runtimes remain explicit prerequisites.
+the required transport and Coding MVP tools in one command. On Ubuntu, Node.js
+and npm remain user-managed prerequisites; the installer provisions the other
+required tools.
 
-For Ubuntu, install the Coding MVP toolchain:
+On Ubuntu, `make install` installs missing system packages with `apt-get`:
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y build-essential fd-find ripgrep
 ```
 
-Install Node.js >= 22.22.2 with npm using your preferred version manager or the
-official distribution. Install tree-sitter CLI >= 0.26.1 from its official
-release or with a toolchain you control. Confirm:
+Install Node.js >= 22.22.2 with npm using NVM or the official distribution. The
+installer downloads and verifies the tree-sitter CLI 0.26.1 from its official
+release archive on Ubuntu when it is missing or too old, then places it under
+`~/.local/opt` and links it from `~/.local/bin`. Existing tree-sitter
+installations that satisfy the minimum version are preserved. Confirm:
 
 ```bash
 node --version
@@ -32,33 +35,35 @@ If Node is managed by NVM, the configuration automatically discovers
 `NVIM_NODE=/absolute/path/to/node` for a deterministic override. The installer
 does not change your shell startup files.
 
-Node, npm, compilers, ripgrep, Make, and tree-sitter are deliberately not
-installed automatically on Ubuntu because they are major shared development
-tools. On macOS they are installed through Homebrew to keep `make install` a
+On macOS, tree-sitter is installed through Homebrew to keep `make install` a
 single command; set `NEOVIM_NO_BREW_BOOTSTRAP=1` to require an existing
-Homebrew installation. The installer uses Homebrew's `tree-sitter-cli` formula
-(the `tree-sitter` library formula does not provide the CLI). `fd` or Ubuntu's
-`fdfind` is optional; Telescope falls back to `rg --files`.
+Homebrew installation. Node.js/npm remain managed by NVM or another user
+chosen runtime manager. The installer uses Homebrew's
+`tree-sitter-cli` formula (the `tree-sitter` library formula does not provide
+the CLI). `fd` or Ubuntu's `fdfind` is optional; Telescope falls back to
+`rg --files`.
 
 ## Install sequence
 
 Run `make install`. The script:
 
-1. Installs missing transport tools through `apt-get` on supported Ubuntu
-   systems, or through Homebrew on macOS.
-2. Uses Neovim 0.12+ or installs a verified Neovim 0.12.3 archive under
+1. Installs missing Ubuntu packages (`build-essential`, `fd-find`, `ripgrep`,
+   and transport utilities) through `apt-get`, or uses Homebrew on macOS.
+2. Ensures tree-sitter CLI >= 0.26.1. Ubuntu uses a verified user-local
+   archive; macOS uses Homebrew.
+3. Uses Neovim 0.12+ or installs a verified Neovim 0.12.3 archive under
    `~/.local/opt/nvim-v0.12.3` (Linux) or the same user-local prefix on macOS,
    linking an unused `~/.local/bin/nvim`. The official macOS archives are
    architecture-specific and checksum-verified.
-3. Verifies all major Coding MVP prerequisites before touching the config path.
-4. Moves an existing Neovim config path (`~/.config/nvim`, unless
+4. Verifies all major Coding MVP prerequisites before touching the config path.
+5. Moves an existing Neovim config path (`~/.config/nvim`, unless
    `XDG_CONFIG_HOME` is set) to a collision-safe timestamped backup.
-5. Symlinks this repository to that platform config path.
-6. Runs blocking `:Lazy! sync`, which installs plugins, builds native FZF, and
+6. Symlinks this repository to that platform config path.
+7. Runs blocking `:Lazy! sync`, which installs plugins, builds native FZF, and
    updates/installs the maintained Treesitter parsers.
-7. Installs `lua-language-server`, `typescript-language-server`, `eslint-lsp`,
+8. Installs `lua-language-server`, `typescript-language-server`, `eslint-lsp`,
    `json-lsp`, `stylua`, and `prettierd` through Mason.
-8. Runs doctor and network-free smoke tests.
+9. Runs doctor and network-free smoke tests.
 
 If validation fails after a new link is created, the installer removes only its
 own link and restores the previous config. Re-running a successful install is
@@ -113,8 +118,10 @@ suffix on collision. They are never deleted automatically.
 repository. A successful install writes an ownership marker in the Neovim data
 directory; when present, uninstall removes this project's lazy.nvim checkout,
 Mason packages, parser/site data, and project-owned state/cache directories.
-It does not remove unrelated Neovim data, backups, Homebrew, Node/npm, Claude,
-Codex, or application `node_modules`. Restore a chosen backup explicitly:
+It does not remove unrelated Neovim data, backups, Homebrew, user-managed
+Node/npm, Claude, Codex, or application `node_modules`. If this repository
+installed its user-local tree-sitter archive, uninstall removes that archive
+and only its matching symlink. Restore a chosen backup explicitly:
 
 ```bash
 mv ~/.config/nvim.backup.TIMESTAMP ~/.config/nvim

@@ -6,13 +6,17 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
 SYSTEM="$(uname -s)"
 MACHINE="$(uname -m)"
 NVIM_VERSION="0.12.3"
+TREE_SITTER_VERSION="0.26.1"
 LOCAL_BIN="${HOME}/.local/bin"
 LOCAL_OPT="${HOME}/.local/opt"
 ACTIVE_NVIM=""
+ACTIVE_TREE_SITTER=""
 NVIM_INSTALLED_BY_REPO=false
+TREE_SITTER_INSTALLED_BY_REPO=false
 BACKUP_PATH=""
 CONFIG_CHANGED=false
 TEMP_DIR=""
+TREE_SITTER_LINK="${LOCAL_BIN}/tree-sitter"
 
 if [[ -n "${XDG_CONFIG_HOME:-}" ]]; then
   CONFIG_ROOT="${XDG_CONFIG_HOME}"
@@ -77,18 +81,32 @@ cleanup() {
     if [[ -L "${CONFIG_LINK}" ]] && [[ "$(resolve_path "${CONFIG_LINK}")" == "${REPO_ROOT}" ]]; then rm -f "${CONFIG_LINK}"; fi
     if [[ -n "${BACKUP_PATH}" ]] && [[ -e "${BACKUP_PATH}" || -L "${BACKUP_PATH}" ]]; then mv "${BACKUP_PATH}" "${CONFIG_LINK}"; fi
   fi
+  if ((status != 0)) && [[ "${TREE_SITTER_INSTALLED_BY_REPO}" == true ]]; then
+    if [[ -L "${TREE_SITTER_LINK}" ]] && [[ "$(resolve_path "${TREE_SITTER_LINK}")" == "${LOCAL_OPT}/tree-sitter-v${TREE_SITTER_VERSION}/bin/tree-sitter" ]]; then rm -f "${TREE_SITTER_LINK}"; fi
+    rm -rf "${LOCAL_OPT}/tree-sitter-v${TREE_SITTER_VERSION}"
+  fi
   exit "${status}"
 }
 trap cleanup EXIT
 
 has_compatible_nvim() { local candidate="$1"; "${candidate}" --headless -u NONE '+if has("nvim-0.12") == 0 | cquit 1 | endif' +qa >/dev/null 2>&1; }
+has_compatible_tree_sitter() { local candidate="$1" version; [[ -x "${candidate}" ]] || return 1; version="$("${candidate}" --version 2>/dev/null | awk '{print $2}')"; [[ -n "${version}" ]] && version_at_least "${version}" "${TREE_SITTER_VERSION}"; }
 
 install_ubuntu_prerequisites() {
   local -a packages=() apt_command=(apt-get) command_name
-  command -v git >/dev/null 2>&1 || packages+=(git); command -v curl >/dev/null 2>&1 || packages+=(curl); command -v tar >/dev/null 2>&1 || packages+=(tar); command -v gzip >/dev/null 2>&1 || packages+=(gzip); command -v unzip >/dev/null 2>&1 || packages+=(unzip); command -v sha256sum >/dev/null 2>&1 || packages+=(coreutils); [[ -f /etc/ssl/certs/ca-certificates.crt ]] || packages+=(ca-certificates)
+  command -v git >/dev/null 2>&1 || packages+=(git)
+  command -v curl >/dev/null 2>&1 || packages+=(curl)
+  command -v tar >/dev/null 2>&1 || packages+=(tar)
+  command -v gzip >/dev/null 2>&1 || packages+=(gzip)
+  command -v unzip >/dev/null 2>&1 || packages+=(unzip)
+  command -v sha256sum >/dev/null 2>&1 || packages+=(coreutils)
+  [[ -f /etc/ssl/certs/ca-certificates.crt ]] || packages+=(ca-certificates)
+  command -v rg >/dev/null 2>&1 || packages+=(ripgrep)
+  if ! command -v fd >/dev/null 2>&1 && ! command -v fdfind >/dev/null 2>&1; then packages+=(fd-find); fi
+  if ! command -v make >/dev/null 2>&1 || ! command -v cc >/dev/null 2>&1 && ! command -v gcc >/dev/null 2>&1 && ! command -v clang >/dev/null 2>&1; then packages+=(build-essential); fi
   ((${#packages[@]} == 0)) && return
   if ((EUID != 0)); then command -v sudo >/dev/null 2>&1 || die "sudo is required to install: ${packages[*]}"; apt_command=(sudo apt-get); fi
-  log "Installing transport prerequisites: ${packages[*]}"; "${apt_command[@]}" update; "${apt_command[@]}" install -y "${packages[@]}"
+  log "Installing Ubuntu prerequisites: ${packages[*]}"; "${apt_command[@]}" update; "${apt_command[@]}" install -y "${packages[@]}"
 }
 
 install_macos_prerequisites() {
@@ -100,7 +118,7 @@ install_macos_prerequisites() {
   fi
   if [[ -x /opt/homebrew/bin/brew ]]; then eval "$(/opt/homebrew/bin/brew shellenv)"; elif [[ -x /usr/local/bin/brew ]]; then eval "$(/usr/local/bin/brew shellenv)"; fi
   local -a packages=()
-  command -v git >/dev/null 2>&1 || packages+=(git); command -v rg >/dev/null 2>&1 || packages+=(ripgrep); command -v fd >/dev/null 2>&1 || packages+=(fd); command -v node >/dev/null 2>&1 || packages+=(node); command -v tree-sitter >/dev/null 2>&1 || packages+=(tree-sitter-cli)
+  command -v git >/dev/null 2>&1 || packages+=(git); command -v rg >/dev/null 2>&1 || packages+=(ripgrep); command -v fd >/dev/null 2>&1 || packages+=(fd); command -v tree-sitter >/dev/null 2>&1 || packages+=(tree-sitter-cli)
   ((${#packages[@]} == 0)) || brew install "${packages[@]}"
   command -v cc >/dev/null 2>&1 || die 'A C compiler is required. Install Xcode Command Line Tools with: xcode-select --install'
 }
@@ -119,13 +137,43 @@ version_at_least() { awk -v a="${1#v}" -v b="${2#v}" 'BEGIN { na=split(a,A,".");
 
 ensure_coding_tools() {
   local -a missing=() node_version tree_sitter_version
+  local tree_sitter_bin="${ACTIVE_TREE_SITTER:-$(command -v tree-sitter || true)}"
   command -v rg >/dev/null 2>&1 || missing+=("ripgrep (rg)"); command -v make >/dev/null 2>&1 || missing+=(make)
   if ! command -v cc >/dev/null 2>&1 && ! command -v gcc >/dev/null 2>&1 && ! command -v clang >/dev/null 2>&1; then missing+=("a C compiler"); fi
   if command -v node >/dev/null 2>&1; then node_version="$(node --version | sed 's/^v//')"; version_at_least "${node_version}" 22.22.2 || missing+=("Node.js >= 22.22.2"); else missing+=("Node.js >= 22.22.2"); fi
   command -v npm >/dev/null 2>&1 || missing+=(npm)
-  if command -v tree-sitter >/dev/null 2>&1; then tree_sitter_version="$(tree-sitter --version | awk '{print $2}')"; version_at_least "${tree_sitter_version}" 0.26.1 || missing+=("tree-sitter CLI >= 0.26.1"); else missing+=("tree-sitter CLI >= 0.26.1"); fi
-  if ((${#missing[@]} > 0)); then printf 'ERROR: missing Coding MVP prerequisites:\n' >&2; printf '  - %s\n' "${missing[@]}" >&2; if [[ "${SYSTEM}" == Darwin ]]; then printf 'Install on macOS with: brew install ripgrep fd node tree-sitter-cli\nInstall Xcode Command Line Tools with: xcode-select --install\n' >&2; elif [[ "${SYSTEM}" == Linux ]]; then printf 'Ubuntu guidance: sudo apt-get update && sudo apt-get install -y build-essential ripgrep\n' >&2; fi; printf 'See docs/installation.md for supported versions.\n' >&2; exit 1; fi
+  if [[ -n "${tree_sitter_bin}" ]] && has_compatible_tree_sitter "${tree_sitter_bin}"; then tree_sitter_version="$("${tree_sitter_bin}" --version | awk '{print $2}')"; else missing+=("tree-sitter CLI >= ${TREE_SITTER_VERSION}"); fi
+  if ((${#missing[@]} > 0)); then printf 'ERROR: missing Coding MVP prerequisites:\n' >&2; printf '  - %s\n' "${missing[@]}" >&2; if [[ "${SYSTEM}" == Darwin ]]; then printf 'Install on macOS with: brew install ripgrep fd tree-sitter-cli\nInstall Xcode Command Line Tools with: xcode-select --install\n' >&2; elif [[ "${SYSTEM}" == Linux ]]; then printf 'Ubuntu guidance: sudo apt-get update && sudo apt-get install -y build-essential ripgrep\n' >&2; fi; printf 'See docs/installation.md for supported versions.\n' >&2; exit 1; fi
   command -v fd >/dev/null 2>&1 || command -v fdfind >/dev/null 2>&1 || log 'WARNING: fd is unavailable; Telescope will use ripgrep.'
+}
+
+install_ubuntu_tree_sitter() {
+  local asset checksum archive destination extracted
+  case "${MACHINE}" in
+    x86_64) asset="tree-sitter-linux-x64.gz"; checksum=d74182fffbf441f247371ad6af77d99b10ac9f788d7e068e4b44992d9d6d7c26;;
+    aarch64|arm64) asset="tree-sitter-linux-arm64.gz"; checksum=98a710e8ab9d502c50b02acd32d553c5fb5d00285cd458e5907af8a580c5a4ea;;
+    *) die "no tree-sitter CLI ${TREE_SITTER_VERSION} archive is configured for Linux/${MACHINE}";;
+  esac
+  destination="${LOCAL_OPT}/tree-sitter-v${TREE_SITTER_VERSION}"
+  if [[ -x "${destination}/bin/tree-sitter" ]] && has_compatible_tree_sitter "${destination}/bin/tree-sitter"; then
+    ACTIVE_TREE_SITTER="${destination}/bin/tree-sitter"
+  else
+    [[ ! -e "${destination}" ]] || die "refusing to replace unexpected path ${destination}"
+    TEMP_DIR="$(mktemp -d)"; archive="${TEMP_DIR}/${asset}"; log "Downloading tree-sitter CLI ${TREE_SITTER_VERSION} for Linux/${MACHINE}."
+    curl --fail --location --retry 3 --output "${archive}" "https://github.com/tree-sitter/tree-sitter/releases/download/v${TREE_SITTER_VERSION}/${asset}"
+    sha256_check "${checksum}" "${archive}" || die 'tree-sitter CLI archive checksum verification failed'
+    extracted="${TEMP_DIR}/tree-sitter"; gzip -dc "${archive}" > "${extracted}"; chmod 755 "${extracted}"
+    mkdir -p "${destination}/bin"; mv "${extracted}" "${destination}/bin/tree-sitter"
+    rm -rf "${TEMP_DIR}"; TEMP_DIR=""; ACTIVE_TREE_SITTER="${destination}/bin/tree-sitter"; TREE_SITTER_INSTALLED_BY_REPO=true
+  fi
+  mkdir -p "${LOCAL_BIN}"
+  if [[ ! -e "${TREE_SITTER_LINK}" && ! -L "${TREE_SITTER_LINK}" ]]; then ln -s "${ACTIVE_TREE_SITTER}" "${TREE_SITTER_LINK}"; elif [[ "$(resolve_path "${TREE_SITTER_LINK}")" != "${ACTIVE_TREE_SITTER}" ]]; then die "refusing to replace unrelated ${TREE_SITTER_LINK}"; fi
+}
+
+select_tree_sitter() {
+  local current_tree_sitter="$(command -v tree-sitter || true)"
+  if [[ -n "${current_tree_sitter}" ]] && has_compatible_tree_sitter "${current_tree_sitter}"; then ACTIVE_TREE_SITTER="${current_tree_sitter}"; return; fi
+  if [[ "${SYSTEM}" == Linux ]] && [[ -r /etc/os-release ]] && source /etc/os-release && [[ "${ID:-}" == ubuntu ]]; then install_ubuntu_tree_sitter; fi
 }
 
 install_neovim() {
@@ -151,9 +199,11 @@ install_neovim() {
 select_neovim() { local current_nvim="$(command -v nvim || true)"; if [[ -n "${current_nvim}" ]] && has_compatible_nvim "${current_nvim}"; then ACTIVE_NVIM="${current_nvim}"; else install_neovim; fi; }
 next_backup_path() { local base="${CONFIG_LINK}.backup.$(date +%Y%m%d-%H%M%S)" candidate="${base}" counter=0; while [[ -e "${candidate}" || -L "${candidate}" ]]; do counter=$((counter + 1)); candidate="${base}.${counter}"; done; printf '%s\n' "${candidate}"; }
 link_configuration() { mkdir -p "${CONFIG_ROOT}"; if [[ -L "${CONFIG_LINK}" ]] && [[ "$(resolve_path "${CONFIG_LINK}")" == "${REPO_ROOT}" ]]; then log "Neovim configuration already points to ${REPO_ROOT}."; return; fi; if [[ -e "${CONFIG_LINK}" || -L "${CONFIG_LINK}" ]]; then BACKUP_PATH="$(next_backup_path)"; mv "${CONFIG_LINK}" "${BACKUP_PATH}"; log "Backed up the existing configuration to ${BACKUP_PATH}."; fi; CONFIG_CHANGED=true; ln -s "${REPO_ROOT}" "${CONFIG_LINK}"; }
-record_ownership() { mkdir -p "${DATA_ROOT}" "${STATE_ROOT}" "${CACHE_ROOT}"; printf 'repository=%s\ndata_root=%s\nstate_root=%s\ncache_root=%s\nnvim_prefix=%s\nnvim_link=%s\nnvim_installed=%s\n' "${REPO_ROOT}" "${DATA_ROOT}" "${STATE_ROOT}" "${CACHE_ROOT}" "${ACTIVE_NVIM%/bin/nvim}" "${LOCAL_BIN}/nvim" "${NVIM_INSTALLED_BY_REPO}" > "${DATA_ROOT}/.neovim-config-owned"; }
+record_ownership() { mkdir -p "${DATA_ROOT}" "${STATE_ROOT}" "${CACHE_ROOT}"; printf 'repository=%s\ndata_root=%s\nstate_root=%s\ncache_root=%s\nnvim_prefix=%s\nnvim_link=%s\nnvim_installed=%s\ntree_sitter_prefix=%s\ntree_sitter_link=%s\ntree_sitter_installed=%s\n' "${REPO_ROOT}" "${DATA_ROOT}" "${STATE_ROOT}" "${CACHE_ROOT}" "${ACTIVE_NVIM%/bin/nvim}" "${LOCAL_BIN}/nvim" "${NVIM_INSTALLED_BY_REPO}" "${ACTIVE_TREE_SITTER%/bin/tree-sitter}" "${TREE_SITTER_LINK}" "${TREE_SITTER_INSTALLED_BY_REPO}" > "${DATA_ROOT}/.neovim-config-owned"; }
 
-ensure_core_tools; select_neovim; ensure_coding_tools; link_configuration
+ensure_core_tools; select_neovim; select_tree_sitter
+if [[ "${ACTIVE_TREE_SITTER}" == "${LOCAL_OPT}/tree-sitter-v${TREE_SITTER_VERSION}/bin/tree-sitter" ]]; then export PATH="${LOCAL_BIN}:${PATH}"; fi
+ensure_coding_tools; link_configuration
 log 'Synchronizing plugins and parser revisions.'; "${ACTIVE_NVIM}" --headless '+Lazy! sync' '+lua assert(vim.fn.exists(":Lazy") == 2, "Lazy command is unavailable")' +qa
 log 'Installing Mason-managed language servers and formatters.'; "${ACTIVE_NVIM}" --headless '+Lazy! load mason.nvim' '+MasonInstall lua-language-server typescript-language-server eslint-lsp json-lsp stylua prettierd' '+lua local r=require("mason-registry"); local p={"lua-language-server","typescript-language-server","eslint-lsp","json-lsp","stylua","prettierd"}; assert(vim.wait(120000, function() for _,n in ipairs(p) do if not r.is_installed(n) then return false end end return true end, 100), "timed out waiting for Mason packages"); for _,n in ipairs(p) do assert(r.is_installed(n), n .. " failed to install") end' +qa
 NVIM_BIN="${ACTIVE_NVIM}" "${SCRIPT_DIR}/doctor.sh"; NVIM_BIN="${ACTIVE_NVIM}" "${REPO_ROOT}/tests/smoke-test.sh"

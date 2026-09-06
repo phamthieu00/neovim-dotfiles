@@ -8,9 +8,10 @@ absent, or that Neovim cannot reach a system clipboard provider.
 
 Install the exact category reported by doctor. On Ubuntu, `build-essential`,
 `ripgrep`, and `fd-find` cover the compiler, Make, ripgrep, and optional finder.
-Use a version manager or official distribution for Node.js >= 22.22.2 and the
-official tree-sitter CLI >= 0.26.1. The installer will not replace shared
-runtime toolchains.
+Use NVM or an official distribution for Node.js >= 22.22.2 with npm, then
+re-run `make install`; Ubuntu provisions a verified user-local tree-sitter
+archive when the existing version is missing or too old. The installer will
+not replace a sufficient shared runtime or an unrelated local binary/symlink.
 
 ## Neovim or PATH is wrong
 

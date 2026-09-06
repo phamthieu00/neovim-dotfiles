@@ -28,6 +28,9 @@ if [[ -f "${marker}" ]] && grep -Fqx "repository=${REPO_ROOT}" "${marker}"; then
   nvim_prefix="$(sed -n 's/^nvim_prefix=//p' "${marker}")"
   nvim_link="$(sed -n 's/^nvim_link=//p' "${marker}")"
   nvim_installed="$(sed -n 's/^nvim_installed=//p' "${marker}")"
+  tree_sitter_prefix="$(sed -n 's/^tree_sitter_prefix=//p' "${marker}")"
+  tree_sitter_link="$(sed -n 's/^tree_sitter_link=//p' "${marker}")"
+  tree_sitter_installed="$(sed -n 's/^tree_sitter_installed=//p' "${marker}")"
   project_plugins=(
     lazy.nvim telescope.nvim plenary.nvim telescope-fzf-native.nvim nvim-treesitter
     nvim-lspconfig mason.nvim mason-lspconfig.nvim blink.cmp conform.nvim
@@ -43,6 +46,7 @@ if [[ -f "${marker}" ]] && grep -Fqx "repository=${REPO_ROOT}" "${marker}"; then
   for package in "${mason_packages[@]}"; do
     rm -rf "${DATA_ROOT}/mason/packages/${package}"
     rm -f "${DATA_ROOT}/mason/bin/${package}"
+    rm -f "${DATA_ROOT}/mason/share/mason-schemas/lsp/${package}.json"
   done
   for binary in lua-language-server typescript-language-server vscode-eslint-language-server vscode-json-language-server stylua prettierd; do
     rm -f "${DATA_ROOT}/mason/bin/${binary}"
@@ -60,6 +64,12 @@ if [[ -f "${marker}" ]] && grep -Fqx "repository=${REPO_ROOT}" "${marker}"; then
     rm -rf "${nvim_prefix}"
     printf 'Removed the Neovim archive installed by this repository.\n'
   fi
+  if [[ "${tree_sitter_installed}" == true && "${tree_sitter_prefix}" == "${HOME}/.local/opt/tree-sitter-v0.26.1" ]]; then
+    [[ "${tree_sitter_link}" == "${HOME}/.local/bin/tree-sitter" ]] || tree_sitter_link=""
+    if [[ -L "${tree_sitter_link}" ]] && [[ "$(resolve_path "${tree_sitter_link}")" == "${tree_sitter_prefix}/bin/tree-sitter" ]]; then rm -f "${tree_sitter_link}"; fi
+    rm -rf "${tree_sitter_prefix}"
+    printf 'Removed the tree-sitter CLI installed by this repository.\n'
+  fi
   printf 'Removed plugins, Mason packages, and project-owned Neovim cache/state data.\n'
 else
   printf 'No ownership marker for this repository was found; plugin/data directories were preserved.\n'
@@ -69,4 +79,4 @@ while IFS= read -r backup; do
   [[ -n "${backup}" ]] || continue
   printf 'Backup available (restore manually with mv): %s\n' "${backup}"
 done < <(find "${CONFIG_ROOT}" -maxdepth 1 -mindepth 1 -name 'nvim.backup.*' -print 2>/dev/null | sort)
-printf 'External tools such as Node.js, npm, Claude, Codex, Homebrew, and project-local dependencies were not removed.\n'
+printf 'External tools such as Node.js/npm, Claude, Codex, Homebrew, and project-local dependencies were not removed.\n'
