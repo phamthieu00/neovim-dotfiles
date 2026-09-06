@@ -32,21 +32,13 @@ If Node is managed by NVM, the configuration automatically discovers
 `NVIM_NODE=/absolute/path/to/node` for a deterministic override. The installer
 does not change your shell startup files.
 
-Node, npm, compilers, ripgrep, Make, tree-sitter, and LazyGit are deliberately not
+Node, npm, compilers, ripgrep, Make, and tree-sitter are deliberately not
 installed automatically on Ubuntu because they are major shared development
 tools. On macOS they are installed through Homebrew to keep `make install` a
 single command; set `NEOVIM_NO_BREW_BOOTSTRAP=1` to require an existing
 Homebrew installation. The installer uses Homebrew's `tree-sitter-cli` formula
 (the `tree-sitter` library formula does not provide the CLI). `fd` or Ubuntu's
 `fdfind` is optional; Telescope falls back to `rg --files`.
-
-LazyGit is the repository's Git UI. On Ubuntu or another Linux distribution,
-install the `lazygit` binary with the distribution method you prefer. On macOS,
-`make install` installs it through Homebrew when it is missing:
-
-```bash
-brew install lazygit
-```
 
 ## Install sequence
 

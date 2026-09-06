@@ -315,27 +315,10 @@ configuration, project manifests, or background requests during startup.
 
 ### gitsigns.nvim
 
-- **Purpose:** default sign-column change markers, hunk navigation/preview, and
-  one-shot full line blame.
-- **Configuration:** default signs and buffer-local mappings using `nav_hunk()`.
+- **Purpose:** change signs, hunk navigation/preview, and one-shot full-line
+  Git blame.
+- **Configuration:** sign-column markers are enabled; line highlights, number
+  highlights, and word diff remain disabled. Buffer-local mappings use `nav_hunk()`
+  and `<leader>hb` invokes blame.
 - **Troubleshooting:** open a tracked file inside a Git worktree and inspect
-  `:checkhealth gitsigns` or `:messages`.
-- **Removal:** remove its specification and hunk mappings; LazyGit remains the
-  repository workflow if it is retained.
-
-### LazyGit
-
-- **Purpose:** provide the repository-wide Git workflow in one terminal UI:
-  status, stage/unstage, commit, diff, branches, log graph, blame, push, and
-  pull.
-- **Configuration:** LazyGit runs in a floating `toggleterm.nvim` terminal and
-  opens with `<leader>gg` or `:LazyGit`. Gitsigns remains responsible for inline
-  hunks and hunk navigation.
-- **External requirement:** the `lazygit` CLI must be installed and available
-  on `PATH`; this repository does not install shell configuration or Git
-  credentials.
-- **Troubleshooting:** run `:LazyGit` and inspect `:messages` if the command is
-  unavailable. Install LazyGit on macOS with `brew install lazygit`.
-- **Removal:** remove the LazyGit command and mapping from
-  `lua/plugins/terminal.lua`, then remove this documentation and its smoke
-  assertion.
+  `]h`, `[h`, `<leader>hp`, or `<leader>hb`, and inspect `:messages`.

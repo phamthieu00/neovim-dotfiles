@@ -65,12 +65,6 @@ if command -v pnpm >/dev/null 2>&1; then
 else
   warning 'pnpm is not installed; npm remains fully supported.'
 fi
-if command -v lazygit >/dev/null 2>&1; then
-  ok "lazygit is available ($(lazygit --version | awk -F'version=' '{print $2}' | cut -d, -f1))."
-else
-  warning 'lazygit is not installed; <leader>gg and :LazyGit will remain unavailable.'
-fi
-
 for ai_command in claude codex; do
   if command -v "${ai_command}" >/dev/null 2>&1; then
     ok "${ai_command} CLI is available ($("${ai_command}" --version 2>/dev/null | head -n 1 || true))."

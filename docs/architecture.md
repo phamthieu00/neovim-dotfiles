@@ -32,7 +32,7 @@ discovers an existing PATH/NVM Node binary without modifying shell files.
 | `lua/plugins/lsp.lua` | Shared LSP, diagnostics, Mason, capabilities, and attach mappings |
 | `lua/plugins/completion.lua` | Blink completion behavior |
 | `lua/plugins/format.lua` | Explicit formatter selection and invocation |
-| `lua/plugins/git.lua` | Git signs, hunk mappings, and repository workflow |
+| `lua/plugins/git.lua` | Git signs, hunk mappings, and line blame |
 | `lua/plugins/oil.lua` | Editable filesystem navigation and operations |
 | `lua/plugins/autopairs.lua` | Default typed-pair insertion |
 | `lua/plugins/surround.lua` | Add, change, and delete delimiter surrounds |

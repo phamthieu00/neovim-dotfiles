@@ -7,7 +7,7 @@ return {
       { "<leader>f", group = "Find / filesystem" },
       { "<leader>c", group = "Code" },
       { "<leader>b", group = "Buffers" },
-      { "<leader>g", group = "Git / LazyGit" },
+      { "<leader>g", group = "Git" },
       { "<leader>h", group = "Git hunks" },
     },
   },

@@ -15,37 +15,12 @@ return {
     },
     config = function(_, opts)
       require("toggleterm").setup(opts)
-
-      local Terminal = require("toggleterm.terminal").Terminal
-      local lazygit = Terminal:new({
-        cmd = "lazygit",
-        direction = "float",
-        hidden = true,
-        close_on_exit = true,
-        on_open = function()
-          vim.cmd("startinsert")
-        end,
-      })
-
-      vim.api.nvim_create_user_command("LazyGit", function()
-        if vim.fn.executable("lazygit") ~= 1 then
-          vim.notify("lazygit is not installed or is not on PATH", vim.log.levels.ERROR)
-          return
-        end
-        lazygit:toggle()
-      end, { desc = "Open LazyGit" })
     end,
     keys = {
       {
         "<C-\\>",
         "<cmd>ToggleTerm<cr>",
         desc = "Toggle terminal",
-      },
-
-      {
-        "<leader>gg",
-        "<cmd>LazyGit<cr>",
-        desc = "Open LazyGit",
       },
 
       {

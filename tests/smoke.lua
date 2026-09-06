@@ -62,6 +62,11 @@ function M.runtime()
   assert(require("blink.cmp"))
   assert(require("conform"))
   assert(require("gitsigns"))
+  local gitsigns_config = require("gitsigns.config").config
+  assert(gitsigns_config.signcolumn == true, "Gitsigns signcolumn markers must be enabled")
+  assert(gitsigns_config.numhl == false, "Gitsigns number highlights must be disabled")
+  assert(gitsigns_config.linehl == false, "Gitsigns line highlights must be disabled")
+  assert(gitsigns_config.word_diff == false, "Gitsigns word diff must be disabled")
   assert(require("nvim-treesitter"))
   vim.cmd("Lazy! load nvim-lspconfig mason.nvim mason-lspconfig.nvim oil.nvim nvim-autopairs nvim-surround which-key.nvim noice.nvim bufferline.nvim nvim-web-devicons persistence.nvim toggleterm.nvim claude-code.nvim codex.nvim")
   assert(require("oil"))
@@ -78,7 +83,6 @@ function M.runtime()
   assert(require("toggleterm"))
   assert(vim.fn.exists(":ToggleTerm") == 2, "ToggleTerm command unavailable")
   assert(vim.fn.exists(":TermSelect") == 2, "TermSelect command unavailable")
-  assert(vim.fn.exists(":LazyGit") == 2, "LazyGit command unavailable")
   assert(vim.fn.maparg("<C-\\>", "n") ~= "", "Ctrl-\\ terminal mapping unavailable")
   assert(require("claude-code"))
   assert(require("claude-code").config.window.position == "vertical", "Claude Code must use a right-side vertical panel")
@@ -106,7 +110,7 @@ function M.runtime()
     f = "Find / filesystem",
     c = "Code",
     b = "Buffers",
-    g = "Git / LazyGit",
+    g = "Git",
     h = "Git hunks",
   }
   for prefix, group in pairs(expected_groups) do
@@ -187,6 +191,12 @@ function M.typescript(fixture_root)
   assert(vim.bo.filetype == "typescript", "TypeScript filetype detection failed")
   assert(vim.fs.root(0, { "tsconfig.json" }) == fixture_root, "tsconfig project detection failed")
   assert_parser("typescript")
+  assert(vim.wait(10000, function()
+    return vim.fn.maparg("]h", "n") ~= ""
+      and vim.fn.maparg("[h", "n") ~= ""
+      and vim.fn.maparg("<leader>hp", "n") ~= ""
+      and vim.fn.maparg("<leader>hb", "n") ~= ""
+  end), "Gitsigns hunk/blame mappings unavailable")
 
   local ts_client = wait_for_client("ts_ls")
   for _, method in ipairs({

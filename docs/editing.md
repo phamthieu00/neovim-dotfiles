@@ -7,7 +7,7 @@ changes, Telescope for finding, and Oil for filesystem operations.
 ## Statusline
 
 The bottom statusline uses Neovim's built-in statusline and shows the current
-mode, Git branch and hunk summary when available, file path and modified state,
+mode, Git branch when available, file path and modified state,
 filetype, LSP diagnostic counts, and cursor position. It does not add a
 statusline plugin or change the existing buffer/window model.
 
@@ -130,7 +130,7 @@ needed.
 ## Discoverability
 
 Press `<Space>` and pause to see which-key's labels for the `f` (Find /
-filesystem), `c` (Code), `b` (Buffers), and `h` (Git hunks) groups. Existing
+filesystem), `c` (Code), `b` (Buffers), `g` (Git), and `h` (Git hunks) groups. Existing
 mapping descriptions are the source of truth, so [docs/keymaps.md](keymaps.md)
 remains the complete reference.
 

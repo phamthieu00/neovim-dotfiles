@@ -34,10 +34,6 @@ function M.branch()
   return "branch:" .. branch
 end
 
-function M.git_status()
-  return vim.b.gitsigns_status or ""
-end
-
 function M.diagnostics()
   local labels = {
     { vim.diagnostic.severity.ERROR, "E" },
@@ -63,7 +59,7 @@ _G.Statusline = M
 
 vim.o.statusline = table.concat({
   "%#StatusLineMode# %{v:lua.Statusline.mode()} ",
-  "%#StatusLineGit#%{v:lua.Statusline.branch()}%{v:lua.Statusline.git_status()} ",
+  "%#StatusLineGit#%{v:lua.Statusline.branch()} ",
   "%#StatusLine#%f%m%r",
   " %y",
   " %= ",

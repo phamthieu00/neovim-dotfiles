@@ -100,7 +100,7 @@ install_macos_prerequisites() {
   fi
   if [[ -x /opt/homebrew/bin/brew ]]; then eval "$(/opt/homebrew/bin/brew shellenv)"; elif [[ -x /usr/local/bin/brew ]]; then eval "$(/usr/local/bin/brew shellenv)"; fi
   local -a packages=()
-  command -v git >/dev/null 2>&1 || packages+=(git); command -v rg >/dev/null 2>&1 || packages+=(ripgrep); command -v fd >/dev/null 2>&1 || packages+=(fd); command -v node >/dev/null 2>&1 || packages+=(node); command -v tree-sitter >/dev/null 2>&1 || packages+=(tree-sitter-cli); command -v lazygit >/dev/null 2>&1 || packages+=(lazygit)
+  command -v git >/dev/null 2>&1 || packages+=(git); command -v rg >/dev/null 2>&1 || packages+=(ripgrep); command -v fd >/dev/null 2>&1 || packages+=(fd); command -v node >/dev/null 2>&1 || packages+=(node); command -v tree-sitter >/dev/null 2>&1 || packages+=(tree-sitter-cli)
   ((${#packages[@]} == 0)) || brew install "${packages[@]}"
   command -v cc >/dev/null 2>&1 || die 'A C compiler is required. Install Xcode Command Line Tools with: xcode-select --install'
 }
