@@ -78,6 +78,7 @@ function M.runtime()
   assert(require("toggleterm"))
   assert(vim.fn.exists(":ToggleTerm") == 2, "ToggleTerm command unavailable")
   assert(vim.fn.exists(":TermSelect") == 2, "TermSelect command unavailable")
+  assert(vim.fn.exists(":LazyGit") == 2, "LazyGit command unavailable")
   assert(vim.fn.maparg("<C-\\>", "n") ~= "", "Ctrl-\\ terminal mapping unavailable")
   assert(require("claude-code"))
   assert(require("claude-code").config.window.position == "vertical", "Claude Code must use a right-side vertical panel")
@@ -105,6 +106,7 @@ function M.runtime()
     f = "Find / filesystem",
     c = "Code",
     b = "Buffers",
+    g = "Git / LazyGit",
     h = "Git hunks",
   }
   for prefix, group in pairs(expected_groups) do

@@ -75,7 +75,8 @@ Use native text objects such as `iw`, `a"`, and `i(` with these operators.
 ## Which-key groups
 
 Press `<Space>` and pause to discover the existing groups: `a` (AI agents), `f`
-(Find / filesystem), `c` (Code), `b` (Buffers), and `h` (Git hunks). which-key
+(Find / filesystem), `c` (Code), `b` (Buffers), `g` (Git / LazyGit), and `h` (Git hunks).
+which-key
 labels these prefixes; this document remains the canonical full reference.
 
 ## AI coding agents
@@ -109,6 +110,15 @@ current Neovim process.
 | `]h` / `[h` | Normal | Jump to next / previous Git hunk |
 | `<leader>hp` | Normal | Preview current Git hunk |
 | `<leader>hb` | Normal | Show full blame for the current line once |
+
+LazyGit owns repository-wide Git workflows:
+
+| Mapping | Mode | Action |
+| --- | --- | --- |
+| `<leader>gg` | Normal | Open LazyGit for status, stage, commit, diff, branch, and graph |
+
+The same workflow is available through `:LazyGit`. Git commands that change
+remote or repository state run only when explicitly invoked inside LazyGit.
 
 ## Blink completion defaults
 

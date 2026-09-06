@@ -44,7 +44,8 @@ synchronizes plugins and parsers and installs the required Mason tools.
 - Use TypeScript and ESLint source actions explicitly; the editor respects
   project-local TypeScript, ESLint, Prettier, and configuration files.
 - Format explicitly with `<leader>cf`; format-on-save is intentionally absent.
-- Inspect Git hunks and one-shot blame without adding a second Git UI.
+- Use LazyGit for Git status, stage/unstage, commit, diff, branch, blame,
+  push, pull, and graph; Gitsigns keeps inline hunk markers and navigation.
 
 The leader is `<Space>` and the local leader is `\`. The complete mapping
 reference, including Blink's defaults, is in [docs/keymaps.md](docs/keymaps.md).
