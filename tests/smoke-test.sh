@@ -6,8 +6,6 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
 NVIM="${NVIM_BIN:-$(command -v nvim || true)}"
 if [[ -n "${XDG_DATA_HOME:-}" ]]; then
   NVIM_DATA="${XDG_DATA_HOME}/nvim"
-elif [[ "$(uname -s)" == Darwin ]]; then
-  NVIM_DATA="${HOME}/Library/Application Support/nvim"
 else
   NVIM_DATA="${HOME}/.local/share/nvim"
 fi
@@ -43,6 +41,7 @@ required_plugins=(
   bufferline.nvim
   nvim-web-devicons
   persistence.nvim
+  toggleterm.nvim
   claude-code.nvim
   codex.nvim
 )

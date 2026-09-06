@@ -4,6 +4,20 @@ This configuration keeps everyday editing close to Neovim's native model. Use
 the smallest tool that matches the task: motions and text objects for local
 changes, Telescope for finding, and Oil for filesystem operations.
 
+## Statusline
+
+The bottom statusline uses Neovim's built-in statusline and shows the current
+mode, Git branch and hunk summary when available, file path and modified state,
+filetype, LSP diagnostic counts, and cursor position. It does not add a
+statusline plugin or change the existing buffer/window model.
+
+## Terminal
+
+Press `<C-\>` in Normal mode to toggle the main terminal. The terminal opens in
+Insert mode, and the same key can toggle it while the terminal is focused.
+`<leader>t1`, `<leader>t2`, and `<leader>t3` select numbered terminals;
+`<leader>ts` opens the terminal selector.
+
 ## Native motions
 
 Start with these high-frequency motions:

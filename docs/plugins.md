@@ -74,6 +74,22 @@ optional CLI agent bridges. `lazy-lock.json` pins resolved revisions.
   session, `<leader>ql` loads the last session, and `<leader>qd` stops saving.
 - **Removal:** remove `lua/plugins/persistence.lua` and its lockfile entry.
 
+### toggleterm.nvim
+
+- **Purpose:** provide persistent, resizable terminal sessions without adding a
+  separate terminal application or shell configuration.
+- **Configuration:** lazy-loads on `<C-\>` or the terminal mappings, uses a
+  horizontal 15-line terminal, starts in Insert mode, and supports terminal
+  mappings for toggling the focused session.
+- **Mappings:** `<C-\>` toggles the main terminal; `<leader>t1`/`t2`/`t3`
+  select numbered terminals, `<leader>tn` toggles the main terminal, and
+  `<leader>ts` selects an existing terminal.
+- **Troubleshooting:** run `:ToggleTerm`, `:TermSelect`, and inspect
+  `:messages` if the terminal does not open. The Codex and Claude panels remain
+  separate integrations.
+- **Removal:** remove `lua/plugins/terminal.lua`, its lock entry, and the
+  terminal assertions from the smoke test.
+
 ### oil.nvim
 
 - **Purpose:** edit a directory as a normal buffer so nearby files can be

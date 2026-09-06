@@ -4,10 +4,10 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
 SYSTEM="$(uname -s)"
-if [[ -n "${XDG_CONFIG_HOME:-}" ]]; then CONFIG_ROOT="${XDG_CONFIG_HOME}"; elif [[ "${SYSTEM}" == Darwin ]]; then CONFIG_ROOT="${HOME}/Library/Application Support"; else CONFIG_ROOT="${HOME}/.config"; fi
-if [[ -n "${XDG_DATA_HOME:-}" ]]; then DATA_ROOT="${XDG_DATA_HOME}/nvim"; elif [[ "${SYSTEM}" == Darwin ]]; then DATA_ROOT="${HOME}/Library/Application Support/nvim"; else DATA_ROOT="${HOME}/.local/share/nvim"; fi
-if [[ -n "${XDG_STATE_HOME:-}" ]]; then STATE_ROOT="${XDG_STATE_HOME}/nvim"; elif [[ "${SYSTEM}" == Darwin ]]; then STATE_ROOT="${HOME}/Library/Preferences/nvim"; else STATE_ROOT="${HOME}/.local/state/nvim"; fi
-if [[ -n "${XDG_CACHE_HOME:-}" ]]; then CACHE_ROOT="${XDG_CACHE_HOME}/nvim"; elif [[ "${SYSTEM}" == Darwin ]]; then CACHE_ROOT="${HOME}/Library/Caches/nvim"; else CACHE_ROOT="${HOME}/.cache/nvim"; fi
+if [[ -n "${XDG_CONFIG_HOME:-}" ]]; then CONFIG_ROOT="${XDG_CONFIG_HOME}"; else CONFIG_ROOT="${HOME}/.config"; fi
+if [[ -n "${XDG_DATA_HOME:-}" ]]; then DATA_ROOT="${XDG_DATA_HOME}/nvim"; else DATA_ROOT="${HOME}/.local/share/nvim"; fi
+if [[ -n "${XDG_STATE_HOME:-}" ]]; then STATE_ROOT="${XDG_STATE_HOME}/nvim"; else STATE_ROOT="${HOME}/.local/state/nvim"; fi
+if [[ -n "${XDG_CACHE_HOME:-}" ]]; then CACHE_ROOT="${XDG_CACHE_HOME}/nvim"; else CACHE_ROOT="${HOME}/.cache/nvim"; fi
 CONFIG_LINK="${CONFIG_ROOT}/nvim"
 
 resolve_path() {

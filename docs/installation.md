@@ -51,9 +51,8 @@ Run `make install`. The script:
    linking an unused `~/.local/bin/nvim`. The official macOS archives are
    architecture-specific and checksum-verified.
 3. Verifies all major Coding MVP prerequisites before touching the config path.
-4. Moves an existing platform config path (`~/.config/nvim` on Linux or
-   `~/Library/Application Support/nvim` on macOS) to a collision-safe
-   timestamped backup.
+4. Moves an existing Neovim config path (`~/.config/nvim`, unless
+   `XDG_CONFIG_HOME` is set) to a collision-safe timestamped backup.
 5. Symlinks this repository to that platform config path.
 6. Runs blocking `:Lazy! sync`, which installs plugins, builds native FZF, and
    updates/installs the maintained Treesitter parsers.
@@ -107,9 +106,8 @@ normal user directories; none belong in this repository.
 
 ## Backups and uninstall
 
-Backups look like `~/.config/nvim.backup.20260905-210000` on Linux or
-`~/Library/Application Support/nvim.backup.20260905-210000` on macOS, with a
-numeric suffix on collision. They are never deleted automatically.
+Backups look like `~/.config/nvim.backup.20260905-210000`, with a numeric
+suffix on collision. They are never deleted automatically.
 
 `make uninstall` removes the config symlink only when it resolves to this
 repository. A successful install writes an ownership marker in the Neovim data

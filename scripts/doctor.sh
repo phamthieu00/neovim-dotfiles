@@ -6,8 +6,6 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
 SYSTEM="$(uname -s)"
 if [[ -n "${XDG_CONFIG_HOME:-}" ]]; then
   CONFIG_ROOT="${XDG_CONFIG_HOME}"
-elif [[ "${SYSTEM}" == Darwin ]]; then
-  CONFIG_ROOT="${HOME}/Library/Application Support"
 else
   CONFIG_ROOT="${HOME}/.config"
 fi
@@ -161,11 +159,11 @@ check_clipboard
 
 run_health() {
   local provider="$1" lazy_plugin="${2:-}" health_output
-  local -a args=()
   health_output="$(mktemp)"
-  [[ -z "${lazy_plugin}" ]] || args+=("+Lazy! load ${lazy_plugin}")
-  if "${NVIM}" --headless "${args[@]}" "+checkhealth ${provider}" \
-    "+silent write! ${health_output}" +qa >/dev/null 2>&1 \
+  local -a args=("+checkhealth ${provider}" "+silent write! ${health_output}" +qa)
+  [[ -z "${lazy_plugin}" ]] || args=("+Lazy! load ${lazy_plugin}" "${args[@]}")
+  if "${NVIM}" --headless "${args[@]}" \
+    '+lua if vim.v.errmsg ~= "" then vim.cmd("cquit 1") end' >/dev/null 2>&1 \
     && ! rg --quiet '❌ ERROR|ERROR No healthcheck' "${health_output}"; then
     ok ":checkhealth ${provider} completed."
   else

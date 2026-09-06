@@ -41,6 +41,7 @@ discovers an existing PATH/NVM Node binary without modifying shell files.
 | `lua/plugins/noice.lua` | Centered command-line and message UI |
 | `lua/plugins/bufferline.lua` | Visible buffer tabs and LSP diagnostic counts |
 | `lua/plugins/persistence.lua` | Explicit session persistence commands |
+| `lua/plugins/terminal.lua` | Toggleterm terminal sessions and mappings |
 | `lua/plugins/claude-code.lua` | Claude Code CLI terminal and editor bridge |
 | `lua/plugins/codex.lua` | OpenAI Codex CLI terminal/app-server bridge |
 | `after/lsp/<server>.lua` | Settings that differ from a server's upstream defaults |

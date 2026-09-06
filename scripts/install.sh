@@ -16,29 +16,21 @@ TEMP_DIR=""
 
 if [[ -n "${XDG_CONFIG_HOME:-}" ]]; then
   CONFIG_ROOT="${XDG_CONFIG_HOME}"
-elif [[ "${SYSTEM}" == Darwin ]]; then
-  CONFIG_ROOT="${HOME}/Library/Application Support"
 else
   CONFIG_ROOT="${HOME}/.config"
 fi
 if [[ -n "${XDG_DATA_HOME:-}" ]]; then
   DATA_ROOT="${XDG_DATA_HOME}/nvim"
-elif [[ "${SYSTEM}" == Darwin ]]; then
-  DATA_ROOT="${HOME}/Library/Application Support/nvim"
 else
   DATA_ROOT="${HOME}/.local/share/nvim"
 fi
 if [[ -n "${XDG_STATE_HOME:-}" ]]; then
   STATE_ROOT="${XDG_STATE_HOME}/nvim"
-elif [[ "${SYSTEM}" == Darwin ]]; then
-  STATE_ROOT="${HOME}/Library/Preferences/nvim"
 else
   STATE_ROOT="${HOME}/.local/state/nvim"
 fi
 if [[ -n "${XDG_CACHE_HOME:-}" ]]; then
   CACHE_ROOT="${XDG_CACHE_HOME}/nvim"
-elif [[ "${SYSTEM}" == Darwin ]]; then
-  CACHE_ROOT="${HOME}/Library/Caches/nvim"
 else
   CACHE_ROOT="${HOME}/.cache/nvim"
 fi
@@ -59,12 +51,22 @@ resolve_path() {
 }
 
 sha256_check() {
-  local expected="$1" archive="$2"
+  local expected="$1" archive="$2" sha256_help actual
   if command -v sha256sum >/dev/null 2>&1; then
-    printf '%s  %s\n' "${expected}" "${archive}" | sha256sum --check --status
-  else
-    [[ "$(shasum -a 256 "${archive}" | awk '{print $1}')" == "${expected}" ]]
+    # macOS also ships a sha256sum binary, but its BSD interface does not
+    # implement GNU's --check/--status options.
+    sha256_help="$(sha256sum --help 2>&1 || true)"
+    if [[ "${sha256_help}" == *'--check'* ]]; then
+      printf '%s  %s\n' "${expected}" "${archive}" | sha256sum --check --status
+      return
+    fi
   fi
+  if command -v shasum >/dev/null 2>&1; then
+    actual="$(shasum -a 256 "${archive}" | awk '{print $1}')"
+    [[ "${actual}" == "${expected}" ]]
+    return
+  fi
+  return 1
 }
 
 cleanup() {
@@ -152,8 +154,8 @@ link_configuration() { mkdir -p "${CONFIG_ROOT}"; if [[ -L "${CONFIG_LINK}" ]] &
 record_ownership() { mkdir -p "${DATA_ROOT}" "${STATE_ROOT}" "${CACHE_ROOT}"; printf 'repository=%s\ndata_root=%s\nstate_root=%s\ncache_root=%s\nnvim_prefix=%s\nnvim_link=%s\nnvim_installed=%s\n' "${REPO_ROOT}" "${DATA_ROOT}" "${STATE_ROOT}" "${CACHE_ROOT}" "${ACTIVE_NVIM%/bin/nvim}" "${LOCAL_BIN}/nvim" "${NVIM_INSTALLED_BY_REPO}" > "${DATA_ROOT}/.neovim-config-owned"; }
 
 ensure_core_tools; select_neovim; ensure_coding_tools; link_configuration
-log 'Synchronizing plugins and parser revisions.'; "${ACTIVE_NVIM}" --headless '+Lazy! sync' +qa
-log 'Installing Mason-managed language servers and formatters.'; "${ACTIVE_NVIM}" --headless '+Lazy! load mason.nvim' '+MasonInstall lua-language-server typescript-language-server eslint-lsp json-lsp stylua prettierd' +qa
+log 'Synchronizing plugins and parser revisions.'; "${ACTIVE_NVIM}" --headless '+Lazy! sync' '+lua assert(vim.fn.exists(":Lazy") == 2, "Lazy command is unavailable")' +qa
+log 'Installing Mason-managed language servers and formatters.'; "${ACTIVE_NVIM}" --headless '+Lazy! load mason.nvim' '+MasonInstall lua-language-server typescript-language-server eslint-lsp json-lsp stylua prettierd' '+lua local r=require("mason-registry"); local p={"lua-language-server","typescript-language-server","eslint-lsp","json-lsp","stylua","prettierd"}; assert(vim.wait(120000, function() for _,n in ipairs(p) do if not r.is_installed(n) then return false end end return true end, 100), "timed out waiting for Mason packages"); for _,n in ipairs(p) do assert(r.is_installed(n), n .. " failed to install") end' +qa
 NVIM_BIN="${ACTIVE_NVIM}" "${SCRIPT_DIR}/doctor.sh"; NVIM_BIN="${ACTIVE_NVIM}" "${REPO_ROOT}/tests/smoke-test.sh"
 record_ownership
 CONFIG_CHANGED=false; log 'Installation complete.'; log "Configuration: ${CONFIG_LINK} -> ${REPO_ROOT}"; [[ -z "${BACKUP_PATH}" ]] || log "Backup: ${BACKUP_PATH}"; [[ ":${PATH}:" == *":${LOCAL_BIN}:"* ]] || log "Add ${LOCAL_BIN} to PATH before starting a new shell."; log "Next: run 'make doctor', then start Neovim."

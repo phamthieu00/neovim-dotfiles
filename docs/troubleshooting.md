@@ -19,6 +19,16 @@ runtime toolchains.
 open a new shell. The installer refuses to overwrite an unrelated binary or
 symlink at that location.
 
+If install stops at `Neovim archive checksum verification failed` on macOS,
+update the repository and retry. macOS's `/sbin/sha256sum` uses the BSD command
+interface, so the installer falls back to `/usr/bin/shasum` instead of passing
+it GNU-only `--check --status` options.
+
+Neovim uses `~/.config/nvim` and `~/.local/share/nvim` by default on macOS as
+well as Linux. If an older install created links under `~/Library/Application
+Support`, those links are not read by the current Neovim binary; they are left
+untouched by this installer.
+
 ## Plugin or parser synchronization fails
 
 Check GitHub/network access, compiler and CLI versions, then run:
