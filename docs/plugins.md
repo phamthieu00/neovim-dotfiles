@@ -1,7 +1,8 @@
 # Plugins
 
 This is a curated, modern Neovim plugin set. It includes focused daily-editing
-integrations, the Catppuccin Mocha color scheme, icons, a centered command
+integrations, Cobalt2 as the default color scheme, Catppuccin as an alternate,
+icons, and a centered command
 line, session restore, and
 optional CLI agent bridges. `lazy-lock.json` pins resolved revisions.
 
@@ -150,18 +151,39 @@ optional CLI agent bridges. `lazy-lock.json` pins resolved revisions.
   health/smoke assertions, and its lock entry. Existing mappings continue to
   work normally.
 
-### catppuccin/nvim
+### cobalt2.nvim
 
-- **Purpose:** provide the active Catppuccin Mocha color scheme.
-- **Why it exists:** a single maintained palette improves readability without
-  adding a statusline, sidebar, or other UI framework.
+- **Repository:** `lalitmee/cobalt2.nvim`
+- **Purpose:** provide the default Cobalt2 color scheme.
+- **Why it exists:** its high-contrast blue palette is the user's selected
+  default without adding a statusline, sidebar, or other UI framework.
+- **Dependency:** `tjdevries/colorbuddy.nvim` at tag `v1.0.0` provides the
+  colorscheme construction API required by Cobalt2.
 - **Configuration:** loaded eagerly at priority 1000; `lua/plugins/theme.lua`
-  sets `flavour = "mocha"` and activates `catppuccin-nvim`.
-- **Troubleshooting:** run `:colorscheme catppuccin-nvim` and inspect
+  activates `cobalt2` through Colorbuddy. Because upstream's
+  `colors/cobalt2.vim` is intentionally empty, `colors/cobalt2.lua` reloads its
+  Lua modules so the standard `:colorscheme cobalt2` command can restore it
+  after another theme.
+- **Troubleshooting:** run `:colorscheme cobalt2` and inspect
   `:echo g:colors_name`. If the theme is missing, use `:Lazy` to verify the
   checkout and rerun `:Lazy sync`.
-- **Removal:** remove `lua/plugins/theme.lua`, its smoke/doctor assertions, and
-  the lockfile entry. Neovim will fall back to its default colors.
+- **Removal:** remove its specification from `lua/plugins/theme.lua`,
+  `colors/cobalt2.lua`, its smoke/doctor assertions, and the Cobalt2 and
+  Colorbuddy lockfile entries.
+
+### catppuccin/nvim
+
+- **Purpose:** provide Catppuccin Mocha as an installed alternate color scheme.
+- **Why it exists:** the user explicitly requested multiple switchable themes;
+  it reuses the prior integration-aware palette without changing the default.
+- **Configuration:** loaded eagerly at priority 900 with integrations for Blink,
+  Gitsigns, native LSP, Noice, Telescope, which-key, and bufferline. Switch to it
+  with `:colorscheme catppuccin-mocha` and back with `:colorscheme cobalt2`.
+- **Troubleshooting:** inspect `:echo g:colors_name`, then use `:Lazy` or
+  `:Lazy sync` if `:colorscheme catppuccin-mocha` is unavailable.
+- **Removal:** remove its specification from `lua/plugins/theme.lua`, the
+  Catppuccin smoke/doctor assertions, and its lockfile entry. Cobalt2 remains
+  the startup default.
 
 ### nvim-web-devicons
 

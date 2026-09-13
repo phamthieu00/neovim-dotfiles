@@ -177,7 +177,7 @@ if [[ -n "${NVIM}" && -L "${CONFIG_LINK}" ]] \
   run_nvim_check 'Neovim starts with the installed configuration.'
   run_nvim_check 'Coding modules load.' \
     '+Lazy! load bufferline.nvim nvim-web-devicons persistence.nvim claude-code.nvim codex.nvim' \
-    "+lua assert(require('telescope') and require('blink.cmp') and require('conform') and require('gitsigns') and require('nvim-treesitter') and require('oil') and require('nvim-autopairs') and require('nvim-surround') and require('which-key') and require('catppuccin') and require('noice') and require('bufferline') and require('nvim-web-devicons') and require('persistence') and require('claude-code') and require('codex') and vim.g.colors_name == 'catppuccin-mocha')"
+    "+lua assert(require('telescope') and require('blink.cmp') and require('conform') and require('gitsigns') and require('nvim-treesitter') and require('oil') and require('nvim-autopairs') and require('nvim-surround') and require('which-key') and require('colorbuddy') and require('catppuccin') and require('noice') and require('bufferline') and require('nvim-web-devicons') and require('persistence') and require('claude-code') and require('codex') and vim.g.colors_name == 'cobalt2')"
   run_nvim_check 'LSP configurations resolve.' \
     '+Lazy! load nvim-lspconfig mason.nvim mason-lspconfig.nvim' \
     "+lua for _,n in ipairs({'lua_ls','ts_ls','eslint','jsonls'}) do assert(vim.lsp.config[n], n .. ' config unavailable') end"

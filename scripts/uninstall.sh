@@ -31,7 +31,7 @@ if [[ -f "${marker}" ]] && grep -Fqx "repository=${REPO_ROOT}" "${marker}"; then
   project_plugins=(
     lazy.nvim telescope.nvim plenary.nvim telescope-fzf-native.nvim nvim-treesitter
     nvim-lspconfig mason.nvim mason-lspconfig.nvim blink.cmp conform.nvim
-    gitsigns.nvim oil.nvim nvim-autopairs nvim-surround which-key.nvim catppuccin
+    gitsigns.nvim oil.nvim nvim-autopairs nvim-surround which-key.nvim cobalt2.nvim colorbuddy.nvim catppuccin
     nui.nvim noice.nvim bufferline.nvim nvim-web-devicons persistence.nvim
     claude-code.nvim codex.nvim
   )

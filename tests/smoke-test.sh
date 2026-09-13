@@ -35,6 +35,8 @@ required_plugins=(
   nvim-autopairs
   nvim-surround
   which-key.nvim
+  cobalt2.nvim
+  colorbuddy.nvim
   catppuccin
   nui.nvim
   noice.nvim

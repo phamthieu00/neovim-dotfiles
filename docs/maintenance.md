@@ -20,7 +20,8 @@ which also execute the Treesitter parser build hook, confirms the six Mason
 packages, runs doctor and smoke tests, and displays repository and lockfile
 changes. It never creates branches or commits and does not update system tools.
 
-Review each daily editing entry and the Catppuccin theme entry independently. A
+Review each daily editing entry and the Cobalt2 and Catppuccin theme entries
+independently. A
 plugin update is not complete until its startup behavior, mappings, and removal
 path remain documented. The icon, Noice, and bufferline entries should be
 reviewed separately because they change terminal rendering, command-line

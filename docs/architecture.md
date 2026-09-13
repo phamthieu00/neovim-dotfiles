@@ -37,7 +37,8 @@ discovers an existing PATH/NVM Node binary without modifying shell files.
 | `lua/plugins/autopairs.lua` | Default typed-pair insertion |
 | `lua/plugins/surround.lua` | Add, change, and delete delimiter surrounds |
 | `lua/plugins/which-key.lua` | Discovery labels for the existing keymap groups |
-| `lua/plugins/theme.lua` | Catppuccin color scheme and its startup activation |
+| `lua/plugins/theme.lua` | Installed color schemes and default theme activation |
+| `colors/cobalt2.lua` | Reload adapter for switching back to Cobalt2 |
 | `lua/plugins/noice.lua` | Centered command-line and message UI |
 | `lua/plugins/bufferline.lua` | Visible buffer tabs and LSP diagnostic counts |
 | `lua/plugins/persistence.lua` | Explicit session persistence commands |
@@ -68,10 +69,11 @@ installs and automatically enables exactly `lua_ls`, `ts_ls`, `eslint`, and
 `jsonls`.
 
 Bufferline loads at `VeryLazy` and only renders a tab-like view of the existing
-buffers; it does not change native split or tab-page semantics. The Catppuccin
-theme loads early with high priority so every later plugin sees a
-consistent palette. Its spec owns only the color scheme; it does not add UI
-mappings. `nvim-web-devicons` owns file glyphs for Oil and bufferline, while
+buffers; it does not change native split or tab-page semantics. Cobalt2 and
+Catppuccin load early; Cobalt2 has the higher priority and is activated as the
+default, while Catppuccin remains available through `:colorscheme`. Their specs
+own only color schemes and do not add UI mappings. `nvim-web-devicons` owns file
+glyphs for Oil and bufferline, while
 Noice owns the command-line presentation and uses `nui.nvim` for floating
 rendering.
 

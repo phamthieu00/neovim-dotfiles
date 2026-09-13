@@ -92,8 +92,10 @@ Persistence restores the current project session automatically; native
 quickfix/location lists and undo history remain available without extra UI
 plugins.
 
-For editing, learn native motions and text objects first. Catppuccin Mocha
-provides the active color scheme. nvim-surround adds
+For editing, learn native motions and text objects first. Cobalt2 is the
+default color scheme, while Catppuccin Mocha remains available with
+`:colorscheme catppuccin-mocha`; switch back with `:colorscheme cobalt2`.
+nvim-surround adds
 `ys`, `ds`, and `cs` for changing delimiters, while nvim-autopairs completes
 typed pairs without changing Blink's completion behavior. which-key exposes the
 existing `a`, `f`, `c`, `b`, and `h` leader groups. Oil shows file icons, and Noice
